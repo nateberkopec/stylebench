@@ -7,6 +7,8 @@ require "optparse"
 require "tmpdir"
 require "yaml"
 
+$stdout.sync = true
+
 ROOT = __dir__
 CONFIG = YAML.load_file(File.join(ROOT, "stylebench.yml"))
 OUT = File.join(ROOT, "out")
@@ -46,7 +48,7 @@ def fingerprint(model, variant, prompt)
 end
 
 def pi_command(model, variant, prompt)
-  cmd = %w[pi -p --mode json -nc -ne -ns --no-session --no-mcp --tools read,write,edit,bash --model] + [model]
+  cmd = CONFIG.fetch("pi", ["pi"]) + %w[-p --mode json -nc -ne -ns --no-session --no-mcp --tools read,write,edit,bash --model] + [model]
   CONFIG.fetch("extensions", []).each { |ext| cmd += ["-e", File.expand_path(ext)] }
   cmd += ["--append-system-prompt", File.join(ROOT, "variants", "#{variant}.md")] if variant
   cmd + [prompt.message]

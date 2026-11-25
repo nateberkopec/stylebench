@@ -1,3 +1,4 @@
+pi: ["fish", "-c", "pi-unsafe $argv", "--"]
 models:
   - openai/gpt-6.2-sol:medium
   - openai/gpt-6.2-astra:medium
@@ -6,5 +7,14 @@ models:
   - baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max
   - claude-code/claude-opus-5-5:medium
   - claude-code/claude-fable-5-2:medium
+  - claude-code/claude-opus-4-6
+  - vercel-ai-gateway/thinkingmachines/inkling-2-small
+  - baseten/zai-org/GLM-5.3
+  - vercel-ai-gateway/google/gemini-4-neon
+  - baseten/moonshotai/Kimi-K3.1-Pro
+  - vercel-ai-gateway/alibaba/qwen3-coder-next
+  - vercel-ai-gateway/meta/muse-wonder-1.0
+  - vercel-ai-gateway/meta/muse-ember
+  - vercel-ai-gateway/mistral/mistral-large-4
 extensions:
   - ~/.pi/agent/git/github.com/nateberkopec/agent-stuff/extensions/claude-code.ts
