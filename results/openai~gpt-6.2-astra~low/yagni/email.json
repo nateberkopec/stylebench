@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": "yagni",
+  "prompt": "email",
+  "fingerprint": "9ce99f8b7a7ba2099c6f8c98a50801e1c6ef53c88caefc64693a8804815d38d4",
+  "code": "def email?(string)\n  /\\A[^\\s@]+@[^\\s@.]+(?:\\.[^\\s@.]+)+\\z/.match?(string)\nend\n",
+  "from_reply": false,
+  "reply": "Added `email?(string)` to `email.rb`. It returns `true` for strings like `user@example.com` and `false` for strings with whitespace, multiple `@` signs, or no dot in the domain. It checks the format, not whether the mailbox exists.",
+  "tools": 2,
+  "seconds": 16.7,
+  "error": null
+}

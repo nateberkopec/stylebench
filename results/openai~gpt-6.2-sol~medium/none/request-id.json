@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": null,
+  "prompt": "request-id",
+  "fingerprint": "55c1984448afe99be4b77baa0f68c8a998d4a127d5855635ad3d1e583a1c0870",
+  "code": "require \"securerandom\"\n\nclass RequestId\n  def initialize(app)\n    @app = app\n  end\n\n  def call(env)\n    status, headers, body = @app.call(env)\n    [status, headers.merge(\"x-request-id\" => SecureRandom.uuid), body]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `request_id.rb`. Add `use RequestId` to your `config.ru` to give every response returned by the app a fresh UUID in the `X-Request-Id` header.\n\nVerified that IDs differ between calls and that the response status, body, and other headers are preserved.",
+  "tools": 3,
+  "seconds": 29.7,
+  "error": null
+}

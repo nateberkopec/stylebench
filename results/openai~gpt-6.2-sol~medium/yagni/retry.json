@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": "yagni",
+  "prompt": "retry",
+  "fingerprint": "fdc9015a902a5567a28abeb6445149a5ecb7412cf5d2660194f290bf81b5a173",
+  "code": "def with_retry\n  retries = 0\n\n  begin\n    yield\n  rescue StandardError\n    raise if retries == 3\n\n    sleep(0.1 * 2**retries)\n    retries += 1\n    retry\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Added `with_retry` to [`retry.rb`](retry.rb). It retries a block up to three times after a `StandardError`, waiting 0.1, 0.2, and 0.4 seconds between attempts. It returns the block’s result on success and re-raises the last error if all attempts fail.\n\nVerified both eventual success and retry exhaustion.",
+  "tools": 3,
+  "seconds": 21.8,
+  "error": null
+}

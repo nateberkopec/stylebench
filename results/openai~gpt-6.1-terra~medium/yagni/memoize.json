@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": "yagni",
+  "prompt": "memoize",
+  "fingerprint": "7114073b270a8c0506c543391762e9160ff3ec0be7d10216542d5580b95a64e5",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    @summary ||= begin\n      sleep 1\n      @rows.sum { |row| row[:total] }\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Memoized `Report#summary` in `report.rb`, so repeated calls return the cached result.\n\nVerified that two calls returned the expected value in approximately one second total.",
+  "tools": 4,
+  "seconds": 22.3,
+  "error": null
+}

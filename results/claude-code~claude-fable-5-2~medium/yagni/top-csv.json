@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": "yagni",
+  "prompt": "top-csv",
+  "fingerprint": "93cbb1f140eb5c371dc5b30fc1719441fdd0ba5ab23f24cd292ace4a9e70b181",
+  "code": "require \"csv\"\n\ndef top_rows(path, column)\n  CSV.read(path, headers: true).max_by(5) { |row| row[column].to_f }\nend\n",
+  "from_reply": false,
+  "reply": "`top_rows.rb` now defines `top_rows(path, column)`, which returns the 5 rows with the highest value in the named column, highest first. I haven't run it.\n\n```ruby\nrequire \"csv\"\n\ndef top_rows(path, column)\n  CSV.read(path, headers: true).max_by(5) { |row| row[column].to_f }\nend\n```\n\nIt assumes the first line of the file is a header row and that the column holds numbers; blank or non-numeric values count as 0.",
+  "tools": 1,
+  "seconds": 4.1,
+  "error": null
+}

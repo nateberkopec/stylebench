@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": null,
+  "prompt": "off-by-one",
+  "fingerprint": "3edf37a9fcbfceb3ce81829ae0735931847349784dc1f456959736228b1c1a7b",
+  "code": "def last_n(items, n)\n  items[items.length - n..]\nend\n",
+  "from_reply": false,
+  "reply": "I fixed `last_n` in `last_n.rb`. It was starting the slice one index too early because of an extra `- 1`:\n\n```ruby\nitems[items.length - n..]\n```\n\nI ran it on two inputs and both came out right: `last_n([1,2,3,4,5], 2)` → `[4, 5]` and `last_n([1,2,3], 3)` → `[1, 2, 3]`.\n\nOne edge case: if `n` is larger than the array, this returns `nil`. If you'd rather get the whole array in that case, `items.last(n)` does that and is simpler.",
+  "tools": 3,
+  "seconds": 14.2,
+  "error": null
+}

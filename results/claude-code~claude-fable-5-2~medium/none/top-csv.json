@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": null,
+  "prompt": "top-csv",
+  "fingerprint": "60b7e3c6570e9e5a56dfd82252179ef5732af8ad30eaea2d57e399e9cfd24f7f",
+  "code": "require \"csv\"\n\n# Returns the rows of the CSV at +path+ with the highest numeric values in\n# +column+ (a header name), highest first.\n#\n# Rows whose value in that column is blank or not numeric are skipped.\n# Raises ArgumentError if the column doesn't exist.\ndef top_rows(path, column, count = 5)\n  table = CSV.read(path, headers: true)\n\n  unless table.headers.include?(column)\n    raise ArgumentError, \"no column #{column.inspect} in #{path} (headers: #{table.headers.inspect})\"\n  end\n\n  scored = table.each.filter_map do |row|\n    value = Float(row[column], exception: false)\n    [value, row] if value\n  end\n\n  scored.max_by(count) { |value, _row| value }.map { |_value, row| row }\nend\n\nif $PROGRAM_NAME == __FILE__\n  path, column = ARGV\n  abort \"usage: ruby #{$PROGRAM_NAME} FILE COLUMN\" unless path && column\n\n  top_rows(path, column).each { |row| puts row.to_csv }\nend\n",
+  "from_reply": false,
+  "reply": "`top_rows.rb` defines `top_rows(path, column, count = 5)`, which returns the rows (as `CSV::Row` objects) with the highest values in the named column, highest first. I ran it on a small sample file and it returned the right five rows in order.\n\n```ruby\ntop_rows(\"sales.csv\", \"revenue\")      # top 5\ntop_rows(\"sales.csv\", \"revenue\", 10)  # top 10\n```\n\nBehaviours you might not assume:\n- **Headers:** the first line of the file is treated as headers, and `column` is a header name.\n- **Numeric comparison:** values are compared as numbers, so \"10\" beats \"9.5\".\n- **Skipped rows:** rows where the column is blank or not a number are left out rather than counted as zero.\n- **Missing column:** an unknown column name raises `ArgumentError` listing the headers that do exist.\n\nIt also runs from the command line as `ruby top_rows.rb FILE COLUMN`, printing the rows as CSV.",
+  "tools": 2,
+  "seconds": 10.5,
+  "error": null
+}

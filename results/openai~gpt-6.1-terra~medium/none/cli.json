@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "cli",
+  "fingerprint": "d779d41c29800261be35d3f6a790fe56031eae4c3bd9a7cd2bb3794c61b42b5d",
+  "code": "#!/usr/bin/env ruby\n\nrequire 'optparse'\n\nverbose = false\nparser = OptionParser.new do |opts|\n  opts.banner = 'Usage: wordcount.rb [--verbose] FILENAME'\n  opts.on('--verbose', 'Also print the number of lines') { verbose = true }\nend\n\nbegin\n  parser.parse!\n  raise OptionParser::MissingArgument, 'filename' unless ARGV.length == 1\n\n  words = 0\n  lines = 0\n  File.foreach(ARGV.first) do |line|\n    lines += 1\n    words += line.split.length\n  end\n\n  puts \"Words: #{words}\"\n  puts \"Lines: #{lines}\" if verbose\nrescue OptionParser::ParseError, SystemCallError => e\n  warn e.message\n  warn parser if e.is_a?(OptionParser::ParseError)\n  exit 1\nend\n",
+  "from_reply": false,
+  "reply": "Created `wordcount.rb`. It counts whitespace-separated words and, with `--verbose`, also prints the line count.\n\n```sh\nruby wordcount.rb [--verbose] filename\n```",
+  "tools": 1,
+  "seconds": 10.9,
+  "error": null
+}

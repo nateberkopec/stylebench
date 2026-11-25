@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": "yagni",
+  "prompt": "email",
+  "fingerprint": "ba67ef2f2688d97bc9dad36c37cfbe3ec99b400044220ecdd584a396479c3f21",
+  "code": "def email?(string)\n  string.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)\nend\n",
+  "from_reply": false,
+  "reply": "I wrote `email?(string)` in `email.rb`. I haven't run it.\n\n```ruby\ndef email?(string)\n  string.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)\nend\n```\n\nIt returns true when the string has one `@`, some text before it, and a domain after it that contains a dot. Whitespace isn't allowed anywhere. This is a loose \"looks like an email\" check, not full RFC 5322 validation, so a few odd strings like `a@b..c` will still pass.",
+  "tools": 1,
+  "seconds": 7.5,
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": null,
+  "prompt": "refactor-shipping",
+  "fingerprint": "23addb1fbdfcaa0ed9462db57d656fd1c5b3832eac7448e7c9809150a5fc1b77",
+  "code": "# Rates keyed by [domestic?, heavy?, express?].\nSHIPPING_RATES = {\n  [true,  true,  true]  => 50,\n  [true,  true,  false] => 20,\n  [true,  false, true]  => 25,\n  [true,  false, false] => 5,\n  [false, true,  true]  => 100,\n  [false, true,  false] => 40,\n  [false, false, true]  => 60,\n  [false, false, false] => 15\n}.freeze\n\ndef shipping_cost(order)\n  domestic = order[:country] == \"US\"\n  heavy = order[:weight] > 10\n  express = order[:express] ? true : false\n\n  SHIPPING_RATES.fetch([domestic, heavy, express])\nend\n",
+  "from_reply": false,
+  "reply": "I replaced the nested conditionals in `shipping.rb` with a rate table looked up by three named conditions (domestic, heavy, express). I checked it against the original across 48 combinations of country, weight and express values, including boundary weights and nil/truthy express, and every result matched.\n\n```ruby\n# Rates keyed by [domestic?, heavy?, express?].\nSHIPPING_RATES = {\n  [true,  true,  true]  => 50,\n  [true,  true,  false] => 20,\n  [true,  false, true]  => 25,\n  [true,  false, false] => 5,\n  [false, true,  true]  => 100,\n  [false, true,  false] => 40,\n  [false, false, true]  => 60,\n  [false, false, false] => 15\n}.freeze\n\ndef shipping_cost(order)\n  domestic = order[:country] == \"US\"\n  heavy = order[:weight] > 10\n  express = order[:express] ? true : false\n\n  SHIPPING_RATES.fetch([domestic, heavy, express])\nend\n```\n\nThe file now defines a top-level constant, `SHIPPING_RATES`, which the original did not.",
+  "tools": 3,
+  "seconds": 12.0,
+  "error": null
+}

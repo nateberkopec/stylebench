@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "parse-duration",
+  "fingerprint": "e0e0db7228b4828ddfcde03ea026c8204cfcc5776ecb1f3b7c885e6ce563e900",
+  "code": "# Converts a duration such as \"1h30m\" or \"45s\" to seconds.\n# Supported units are days (d), hours (h), minutes (m), and seconds (s).\n# Raises ArgumentError for empty or malformed durations.\ndef duration_in_seconds(duration)\n  unless duration.is_a?(String) && duration.match?(/\\A(?:\\d+[dhms])+\\z/)\n    raise ArgumentError, \"invalid duration: #{duration.inspect}\"\n  end\n\n  units = { \"d\" => 86_400, \"h\" => 3_600, \"m\" => 60, \"s\" => 1 }\n  duration.scan(/(\\d+)([dhms])/).sum { |amount, unit| amount.to_i * units.fetch(unit) }\nend\n",
+  "from_reply": false,
+  "reply": "Created `duration.rb` with `duration_in_seconds`, supporting days, hours, minutes, and seconds. Invalid input raises `ArgumentError`.\n\nVerified the supplied examples and an invalid input case.",
+  "tools": 3,
+  "seconds": 20.9,
+  "error": null
+}

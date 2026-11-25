@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": "yagni",
+  "prompt": "money",
+  "fingerprint": "ab1daa613c6ab71fa78de6c515c4cbb9f3215afa49ded282a19f49795e4989f2",
+  "code": "class Money\n  include Comparable\n\n  attr_reader :cents\n\n  def initialize(cents)\n    @cents = cents\n    freeze\n  end\n\n  def <=>(other)\n    return nil unless other.is_a?(Money)\n\n    cents <=> other.cents\n  end\n\n  def eql?(other)\n    other.is_a?(Money) && cents.eql?(other.cents)\n  end\n\n  def hash\n    cents.hash\n  end\n\n  def to_s\n    sign = cents.negative? ? \"-\" : \"\"\n    amount = cents.abs\n    \"%s$%d.%02d\" % [sign, amount / 100, amount % 100]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `money.rb` with a `Money` value object that stores integer cents, supports equality and comparison, and formats amounts as dollars (for example, `Money.new(1234).to_s` returns `\"$12.34\"`).\n\nVerified formatting, comparison, equality, and hash-key behavior with a Ruby smoke test.",
+  "tools": 3,
+  "seconds": 20.7,
+  "error": null
+}

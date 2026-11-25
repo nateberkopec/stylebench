@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": null,
+  "prompt": "request-id",
+  "fingerprint": "78bd02b46e9da2249ba13318470483722b028b5818f3521c3fa483538c6251f6",
+  "code": "# frozen_string_literal: true\n\nrequire \"securerandom\"\n\n# Rack middleware that ensures every response carries an X-Request-Id header.\n#\n# If the incoming request already has an X-Request-Id (e.g. set by a load\n# balancer or upstream proxy), it is reused so the id can be traced across\n# services. Otherwise a new UUID is generated. The id is also exposed to the\n# app via env[\"request_id\"].\n#\n#   use RequestId\nclass RequestId\n  HEADER     = \"x-request-id\"           # Rack 3 requires lowercase header names\n  ENV_KEY    = \"HTTP_X_REQUEST_ID\"\n  MAX_LENGTH = 255\n  VALID_ID   = /\\A[\\w\\-.:]+\\z/          # keep untrusted ids out of logs/headers\n\n  def initialize(app)\n    @app = app\n  end\n\n  def call(env)\n    request_id = sanitize(env[ENV_KEY]) || SecureRandom.uuid\n    env[\"request_id\"] = request_id\n\n    status, headers, body = @app.call(env)\n    headers[HEADER] = request_id\n    [status, headers, body]\n  end\n\n  private\n\n  def sanitize(id)\n    return nil if id.nil? || id.empty? || id.length > MAX_LENGTH\n    id.match?(VALID_ID) ? id : nil\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I wrote the middleware in `request_id.rb` and ran a quick check that covered all three cases below.\n\nTo use it, add `use RequestId` to your `config.ru`.\n\n- **Reuses an incoming id:** if the request already has an `X-Request-Id` (for example, from a load balancer or proxy), that same id goes on the response. This lets you trace a request across services.\n- **Generates an id otherwise:** when there's no incoming id, it creates a new random one with `SecureRandom.uuid`.\n- **Rejects bad incoming ids:** if the incoming id is empty, longer than 255 characters, or contains anything other than letters, digits, `_`, `-`, `.` or `:`, it's replaced with a new UUID. This stops a client from injecting line breaks into headers or logs.\n- **Shares the id with your app:** the id is stored in `env[\"request_id\"]` so your code can use it, for example in logging.\n- **Header name:** the header is written in lowercase (`x-request-id`), as Rack 3 requires. Header names aren't case-sensitive, so clients still see the same header.",
+  "tools": 2,
+  "seconds": 13.1,
+  "error": null
+}

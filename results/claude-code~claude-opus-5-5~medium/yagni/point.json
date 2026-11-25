@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": "yagni",
+  "prompt": "point",
+  "fingerprint": "f7d5538dfea8d58417027205257269e9ce15a6a0293d93827c129e9180cf2f3f",
+  "code": "Point = Struct.new(:x, :y) do\n  def distance_to(other)\n    Math.hypot(other.x - x, other.y - y)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I created `point.rb`, which defines a `Point` struct with `x` and `y` and a `distance_to` method that returns the straight-line distance using `Math.hypot`. I haven't run it.\n\n```ruby\nPoint.new(0, 0).distance_to(Point.new(3, 4)) # => 5.0\n```",
+  "tools": 1,
+  "seconds": 5.1,
+  "error": null
+}

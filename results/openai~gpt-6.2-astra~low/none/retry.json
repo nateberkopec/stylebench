@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "retry",
+  "fingerprint": "6e94fb586b43b601e1b301cca4425fbabfa52062532b2922c9135840e9c1933d",
+  "code": "# Runs the block up to max_attempts times, including the initial attempt.\n# Pass specific exception classes via errors to retry only transient failures.\ndef retry_with_backoff(max_attempts: 3, initial_delay: 0.1, errors: [StandardError])\n  raise ArgumentError, 'block required' unless block_given?\n  unless max_attempts.is_a?(Integer) && max_attempts.positive?\n    raise ArgumentError, 'max_attempts must be a positive integer'\n  end\n  raise ArgumentError, 'initial_delay must be nonnegative' unless initial_delay >= 0\n\n  attempts = 0\n  delay = initial_delay\n  begin\n    attempts += 1\n    yield\n  rescue *errors\n    raise if attempts >= max_attempts\n\n    sleep(delay)\n    delay *= 2\n    retry\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `retry.rb` with `retry_with_backoff`. By default, it makes up to three attempts, waiting 0.1 seconds before the second and 0.2 seconds before the third. It returns the block’s value on success and re-raises the final error if all attempts fail.\n\nTo retry only specific errors:\n\n```ruby\nretry_with_backoff(errors: [IOError]) { fetch_data }\n```",
+  "tools": 3,
+  "seconds": 24.2,
+  "error": null
+}

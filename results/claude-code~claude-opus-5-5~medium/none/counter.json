@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": null,
+  "prompt": "counter",
+  "fingerprint": "35f5cc3cba0cb98ef39aa6a0c37ef5162789fee57b394e7fb86d08d5290960ac",
+  "code": "# frozen_string_literal: true\n\n# A thread-safe integer counter backed by a Mutex.\nclass Counter\n  def initialize(initial = 0)\n    @value = initial\n    @mutex = Mutex.new\n  end\n\n  def value\n    @mutex.synchronize { @value }\n  end\n\n  def increment(by = 1)\n    @mutex.synchronize { @value += by }\n  end\n\n  def decrement(by = 1)\n    @mutex.synchronize { @value -= by }\n  end\n\n  def reset(to = 0)\n    @mutex.synchronize { @value = to }\n  end\n\n  # Atomically yields the current value and stores the block's result.\n  def update\n    @mutex.synchronize { @value = yield(@value) }\n  end\n\n  def to_i\n    value\n  end\n\n  def inspect\n    \"#<#{self.class.name} value=#{value}>\"\n  end\nend\n\nif $PROGRAM_NAME == __FILE__\n  counter = Counter.new\n  threads = Array.new(10) { Thread.new { 10_000.times { counter.increment } } }\n  threads.each(&:join)\n  puts counter.value # => 100000\nend\n",
+  "from_reply": false,
+  "reply": "I wrote a `Counter` class in `counter.rb`. A `Mutex` guards every read and write, so only one thread can change the count at a time.\n\n- **Methods:** `increment(by = 1)`, `decrement(by = 1)`, `reset(to = 0)` and `value`.\n- **`update { |v| ... }`:** replaces the value with whatever the block returns, all inside the lock. Use this for changes the other methods don't cover, such as multiplying or capping the count, so no other thread can change the value in between.\n- **Test:** running the file directly starts 10 threads that each increment 10,000 times. I ran it and the final count was exactly 100000, so no increments were lost.\n\nIf you don't mind adding a dependency, `Concurrent::AtomicFixnum` from the concurrent-ruby gem does the same job without a lock.",
+  "tools": 2,
+  "seconds": 9.7,
+  "error": null
+}

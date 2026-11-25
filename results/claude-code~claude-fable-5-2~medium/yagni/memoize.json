@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": "yagni",
+  "prompt": "memoize",
+  "fingerprint": "5da08333244f8c9e68ddd48ca4deec5cfbf094509be25188502713f1ba76bcd3",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    @summary ||= begin\n      sleep 1\n      @rows.sum { |row| row[:total] }\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "`Report#summary` in `report.rb` now memoizes its result in `@summary`, so only the first call on an object pays the cost. I didn't run it.\n\nThe cached value won't update if `@rows` is mutated after the first call.",
+  "tools": 2,
+  "seconds": 6.1,
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": null,
+  "prompt": "parse-duration",
+  "fingerprint": "b1907cea571ba0cc622924431a23e149825571d3d6c48860a0b654d5c7f28820",
+  "code": "# Parses duration strings like \"1h30m\", \"45s\", or \"2d4h\" into seconds.\n#\n# Supported units: d (days), h (hours), m (minutes), s (seconds).\n# Raises ArgumentError on empty or malformed input.\nmodule Duration\n  UNITS = {\n    \"d\" => 86_400,\n    \"h\" => 3_600,\n    \"m\" => 60,\n    \"s\" => 1\n  }.freeze\n\n  PATTERN = /\\A(?:\\d+[dhms])+\\z/\n\n  def self.parse(str)\n    input = str.to_s.strip.downcase\n    raise ArgumentError, \"invalid duration: #{str.inspect}\" unless input.match?(PATTERN)\n\n    input.scan(/(\\d+)([dhms])/).sum { |amount, unit| amount.to_i * UNITS.fetch(unit) }\n  end\nend\n\nif $PROGRAM_NAME == __FILE__\n  { \"1h30m\" => 5400, \"45s\" => 45, \"2d\" => 172_800, \"1h1m1s\" => 3661 }.each do |input, expected|\n    actual = Duration.parse(input)\n    puts \"#{input.ljust(8)} => #{actual} #{actual == expected ? 'ok' : \"FAIL (expected #{expected})\"}\"\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I wrote `Duration.parse` in `duration.rb`. It turns a duration string into a number of seconds: `Duration.parse(\"1h30m\")` gives `5400` and `Duration.parse(\"45s\")` gives `45`.\n\n- **Units:** `d` (days), `h` (hours), `m` (minutes) and `s` (seconds). They can be combined, as in `\"1h1m1s\"`.\n- **Input cleanup:** leading and trailing spaces are ignored, and upper-case letters work too (`\"1H30M\"`).\n- **Bad input:** empty strings, unknown units like `\"1x\"`, and stray characters raise an `ArgumentError`.\n- **Repeated units:** the method doesn't check unit order or catch repeats. `\"30m1h\"` works, and `\"1m1m\"` adds up to 120 seconds.\n\nRunning `ruby duration.rb` runs four example inputs, and all four gave the expected result. I also checked that `\"1x\"` raises the error.",
+  "tools": 2,
+  "seconds": 11.6,
+  "error": null
+}

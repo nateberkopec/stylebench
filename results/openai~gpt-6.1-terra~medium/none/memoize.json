@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "memoize",
+  "fingerprint": "21dcbf7eb7fa051d7e666181346d900fd1a1d4f6ea86d3f4a98ab7516c3b52a3",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    @summary ||= begin\n      sleep 1\n      @rows.sum { |row| row[:total] }\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Memoized `Report#summary` in `report.rb`, so repeated calls reuse the first result.\n\nVerified that two calls return the expected value in approximately one second total. The cached result assumes the rows do not change after the first call.",
+  "tools": 5,
+  "seconds": 30.2,
+  "error": null
+}

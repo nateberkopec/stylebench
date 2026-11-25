@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": "yagni",
+  "prompt": "email",
+  "fingerprint": "f809a0b20f891f81106dba738a4af1bec39acbf8a75e0b1ed78d655b5ee828bb",
+  "code": "def looks_like_email?(string)\n  string.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)\nend\n",
+  "from_reply": false,
+  "reply": "Created `email.rb` with `looks_like_email?`, which returns `true` when a string resembles an email address.",
+  "tools": 2,
+  "seconds": 19.5,
+  "error": null
+}

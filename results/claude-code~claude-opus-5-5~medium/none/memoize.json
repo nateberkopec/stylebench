@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": null,
+  "prompt": "memoize",
+  "fingerprint": "60eecc25522f215c21f64f50a7e0684ac0999a7379a0a4e91ca0c47bb7fab54a",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    @summary ||= begin\n      sleep 1\n      @rows.sum { |row| row[:total] }\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "In `report.rb`, `Report#summary` now saves its result the first time it runs, so later calls on the same object skip the slow part and return right away. I haven't run it.\n\n```ruby\ndef summary\n  @summary ||= begin\n    sleep 1\n    @rows.sum { |row| row[:total] }\n  end\nend\n```\n\n`||=` is fine here because the sum is always a number, never `nil` or `false`, so the saved value is always reused.\n\n**Caveat:** if someone changes the `rows` array after the first call, `summary` will keep returning the old total. If that can happen, the saved value would need to be cleared when the rows change.",
+  "tools": 2,
+  "seconds": 10.3,
+  "error": null
+}

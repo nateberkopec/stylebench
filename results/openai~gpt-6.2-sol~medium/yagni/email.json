@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": "yagni",
+  "prompt": "email",
+  "fingerprint": "1ef986b43ad82e60278b1685ddf14b008a6ee7c8fd40cfc2cd879320b452eb55",
+  "code": "def email?(string)\n  string.match?(/\\A[^@\\s]+@[^@\\s.]+(?:\\.[^@\\s.]+)+\\z/)\nend\n",
+  "from_reply": false,
+  "reply": "Added `email?(string)` to `email.rb`. It checks for a basic email shape: a nonempty part before `@`, a dotted domain, and no whitespace. It returns `true` or `false` without checking whether the address exists.",
+  "tools": 3,
+  "seconds": 18.0,
+  "error": null
+}

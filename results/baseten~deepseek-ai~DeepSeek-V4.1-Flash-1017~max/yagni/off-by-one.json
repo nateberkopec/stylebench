@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": "yagni",
+  "prompt": "off-by-one",
+  "fingerprint": "1865d89d526e355a3793f7ce7d0ae12acc2ede929c1ec72fbd1aeb66fba87091",
+  "code": "def last_n(items, n)\n  items[items.length - n..]\nend\n",
+  "from_reply": false,
+  "reply": "Fixed the off-by-one in `last_n.rb`:\n\n```ruby\ndef last_n(items, n)\n  items[items.length - n..]\nend\n```\n\n`last_n([1,2,3,4,5], 2)` now returns `[4, 5]`.",
+  "tools": 3,
+  "seconds": 8.0,
+  "error": null
+}

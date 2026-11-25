@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": "yagni",
+  "prompt": "parse-duration",
+  "fingerprint": "282ad20f38b33d4682a95d925972dc30c6d091cac8affe794a22c12d3353c239",
+  "code": "UNIT_SECONDS = { \"h\" => 3600, \"m\" => 60, \"s\" => 1 }\n\ndef parse_duration(string)\n  string.scan(/(\\d+)([hms])/).sum { |amount, unit| amount.to_i * UNIT_SECONDS[unit] }\nend\n",
+  "from_reply": false,
+  "reply": "`duration.rb` now defines `parse_duration`, which sums the hour, minute and second parts of the string: `parse_duration(\"1h30m\")` gives 5400 and `parse_duration(\"45s\")` gives 45. I haven't run it.\n\nAnything that isn't a whole number followed by `h`, `m` or `s` is ignored, so an unrecognised string returns 0 rather than raising.",
+  "tools": 1,
+  "seconds": 4.8,
+  "error": null
+}

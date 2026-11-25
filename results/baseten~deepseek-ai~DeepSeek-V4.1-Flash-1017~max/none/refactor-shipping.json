@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": null,
+  "prompt": "refactor-shipping",
+  "fingerprint": "e9bb40fcec8457eafce3a533aa35a28f22c371ad24f26c84b1b6860ec1f0fe6f",
+  "code": "RATES = {\n  domestic: {\n    heavy: { express: 50, standard: 20 },\n    light: { express: 25, standard: 5 }\n  },\n  international: {\n    heavy: { express: 100, standard: 40 },\n    light: { express: 60, standard: 15 }\n  }\n}.freeze\n\ndef shipping_cost(order)\n  region = order[:country] == \"US\" ? :domestic : :international\n  weight = order[:weight] > 10 ? :heavy : :light\n  service = order[:express] ? :express : :standard\n\n  RATES.dig(region, weight, service)\nend\n",
+  "from_reply": false,
+  "reply": "Refactored `shipping.rb` to replace the nested conditionals with a rate lookup table:\n\n```ruby\nRATES = {\n  domestic: {\n    heavy: { express: 50, standard: 20 },\n    light: { express: 25, standard: 5 }\n  },\n  international: {\n    heavy: { express: 100, standard: 40 },\n    light: { express: 60, standard: 15 }\n  }\n}.freeze\n\ndef shipping_cost(order)\n  region = order[:country] == \"US\" ? :domestic : :international\n  weight = order[:weight] > 10 ? :heavy : :light\n  service = order[:express] ? :express : :standard\n\n  RATES.dig(region, weight, service)\nend\n```\n\nVerified all 36 combinations of country/weight/express against the original implementation — behavior is unchanged.",
+  "tools": 4,
+  "seconds": 23.0,
+  "error": null
+}

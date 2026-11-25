@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": null,
+  "prompt": "refactor-shipping",
+  "fingerprint": "5d8f554998c6eaecf7cc21033b3b6e541e1ed5eb9659dfdc5c324dc5d6d8ba87",
+  "code": "def shipping_cost(order)\n  domestic = order[:country] == \"US\"\n  heavy = order[:weight] > 10\n\n  if domestic\n    return order[:express] ? 50 : 20 if heavy\n\n    return order[:express] ? 25 : 5\n  end\n\n  return order[:express] ? 100 : 40 if heavy\n\n  order[:express] ? 60 : 15\nend\n",
+  "from_reply": false,
+  "reply": "Refactored `shipping_cost` in `shipping.rb` using named `domestic` and `heavy` conditions and early returns to reduce nesting. Rates, the `> 10` weight cutoff, and express truthiness are unchanged.\n\nRuby syntax check and all 16 behavior checks passed.",
+  "tools": 3,
+  "seconds": 30.6,
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "lru",
+  "fingerprint": "f8cabf7fb64626e5c0cb8dc7645f4f39406998ba18b5b4fc6ea74744c6ba64b2",
+  "code": "# A fixed-capacity, least-recently-used cache.\nclass LRUCache\n  def initialize(capacity)\n    unless capacity.is_a?(Integer) && capacity.positive?\n      raise ArgumentError, \"capacity must be a positive integer\"\n    end\n\n    @capacity = capacity\n    @entries = {}\n  end\n\n  # Returns nil on a miss. Accessing an entry makes it most recently used.\n  def get(key)\n    return nil unless @entries.key?(key)\n\n    value = @entries.delete(key)\n    @entries[key] = value\n    value\n  end\n\n  # Inserts or updates an entry, evicting the least recently used if needed.\n  def put(key, value)\n    @entries.delete(key)\n    @entries[key] = value\n    @entries.shift if @entries.size > @capacity\n    value\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `lru_cache.rb` with a fixed-capacity `LRUCache` supporting `get` and `put`. It evicts the least recently used entry when full and rejects non-positive capacities.\n\nVerified with a Ruby smoke test.",
+  "tools": 3,
+  "seconds": 22.7,
+  "error": null
+}

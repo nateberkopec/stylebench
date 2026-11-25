@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": null,
+  "prompt": "counter",
+  "fingerprint": "e3f0edf1150a59d3c972de685625330900f461487026cdf9e92100a9aa697f2b",
+  "code": "# frozen_string_literal: true\n\n# A counter that can be safely shared between threads.\n#\n#   counter = Counter.new\n#   counter.increment      # => 1\n#   counter.increment(5)   # => 6\n#   counter.decrement      # => 5\n#   counter.value          # => 5\nclass Counter\n  def initialize(initial = 0)\n    @value = initial\n    @mutex = Mutex.new\n  end\n\n  # Adds +by+ to the counter and returns the new value.\n  def increment(by = 1)\n    @mutex.synchronize { @value += by }\n  end\n\n  # Subtracts +by+ from the counter and returns the new value.\n  def decrement(by = 1)\n    @mutex.synchronize { @value -= by }\n  end\n\n  def value\n    @mutex.synchronize { @value }\n  end\n\n  # Sets the counter back to +to+ and returns the previous value.\n  def reset(to = 0)\n    @mutex.synchronize do\n      previous = @value\n      @value = to\n      previous\n    end\n  end\n\n  # Atomically replaces the value with the result of the block, which\n  # receives the current value. Returns the new value. The block runs\n  # while the lock is held, so it must not call back into this counter.\n  def update\n    @mutex.synchronize { @value = yield(@value) }\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I wrote `counter.rb` with a `Counter` class that guards its value with a `Mutex`. A quick check with 20 threads each incrementing 10,000 times gave exactly 200,000.\n\nThe class has:\n- `increment(by = 1)` and `decrement(by = 1)`, which return the new value.\n- `value`, which reads the current count.\n- `reset(to = 0)`, which returns the previous value.\n- `update { |v| ... }`, which atomically sets the value to the block's result, for compound changes such as doubling or clamping.\n\nThe block passed to `update` runs while the lock is held, so it must not call back into the same counter; Ruby's `Mutex` is not reentrant and would raise a `ThreadError`.",
+  "tools": 2,
+  "seconds": 9.6,
+  "error": null
+}

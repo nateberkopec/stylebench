@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": "yagni",
+  "prompt": "off-by-one",
+  "fingerprint": "dbd671c30b29e18fb33ade12e303616ea9352cfa60f6840a424eefc1d8aadc24",
+  "code": "def last_n(items, n)\n  items.last(n)\nend\n",
+  "from_reply": false,
+  "reply": "Fixed `last_n.rb`: the body is now `items.last(n)`, which removes the off-by-one. I didn't run it.\n\nI used `last` rather than just dropping the `- 1`, because the slice version still misbehaves when `n` is larger than the array (the negative start index returns `nil` or the wrong slice). `items.last(n)` returns the whole array in that case.",
+  "tools": 2,
+  "seconds": 6.9,
+  "error": null
+}

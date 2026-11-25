@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": null,
+  "prompt": "request-id",
+  "fingerprint": "0d3e0e07c810963e448f34df1a8e229d04bd5e3b9d256583875d5e56f15b3ee0",
+  "code": "require 'securerandom'\n\nclass RequestId\n  def initialize(app)\n    @app = app\n  end\n\n  def call(env)\n    request_id = env['HTTP_X_REQUEST_ID'] || SecureRandom.uuid\n    env['HTTP_X_REQUEST_ID'] = request_id\n\n    status, headers, body = @app.call(env)\n    headers['X-Request-Id'] = request_id\n\n    [status, headers, body]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `request_id.rb` with Rack middleware that reuses an incoming `X-Request-Id` or generates a UUID, then adds it to the response header.",
+  "tools": 2,
+  "seconds": 29.0,
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": null,
+  "prompt": "top-csv",
+  "fingerprint": "5f4b4b5d276082d02571bfa8251207a0df48363ea61ca3bad6c96d3b53720f32",
+  "code": "require \"csv\"\n\n# Returns the five CSV rows with the highest numeric value in +column+.\n# The CSV is expected to have a header row; +column+ can be a header name\n# or a header index. Rows are returned as CSV::Row objects.\ndef top_rows(path, column)\n  rows = CSV.read(path, headers: true).each_with_index.map do |row, index|\n    value = Float(row[column])\n    [value, index, row]\n  end\n\n  rows.sort_by { |value, index, _row| [-value, index] }\n      .first(5)\n      .map(&:last)\nend\n",
+  "from_reply": false,
+  "reply": "Created **`top_rows.rb`**. It defines `top_rows(path, column)`, which reads a header-based CSV and returns the five rows with the highest numeric values in the specified column. Rows are returned as `CSV::Row` objects; `column` can be a header name or index.\n\nSyntax check passed.",
+  "tools": 3,
+  "seconds": 29.7,
+  "error": null
+}

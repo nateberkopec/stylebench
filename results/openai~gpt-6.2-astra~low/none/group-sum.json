@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "group-sum",
+  "fingerprint": "b071a6692765963d9700c1f634bed671b838a237420ab1bddb8f197bac31d3cb",
+  "code": "def totals_by_category(entries)\n  entries.each_with_object(Hash.new(0)) do |entry, totals|\n    totals[entry.fetch(:category)] += entry.fetch(:amount)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `totals.rb` with `totals_by_category(entries)`. It sums `:amount` values by `:category` and returns an empty hash for an empty array.",
+  "tools": 2,
+  "seconds": 10.8,
+  "error": null
+}

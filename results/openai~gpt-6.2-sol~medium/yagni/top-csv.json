@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": "yagni",
+  "prompt": "top-csv",
+  "fingerprint": "3c53fdfb25e821b5b3b878bac2909b44ea85abc7df6ab067d21fb60c13a0cc63",
+  "code": "require \"csv\"\n\ndef top_rows(path, column)\n  CSV.foreach(path, headers: true).max_by(5) { |row| Float(row[column]) }\nend\n",
+  "from_reply": false,
+  "reply": "Added `top_rows(path, column)` in `top_rows.rb`. It takes a CSV file path and a column header, then returns up to five `CSV::Row` objects sorted by that column’s numeric value, highest first.\n\nVerified with a six-row CSV that `10` ranks above `9` and only five rows are returned.",
+  "tools": 3,
+  "seconds": 27.6,
+  "error": null
+}

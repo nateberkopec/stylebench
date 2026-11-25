@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": "yagni",
+  "prompt": "refactor-shipping",
+  "fingerprint": "bc293e971d76387a2cf548622a3fd0d34aaf5ab435872554bbe50dcd4ddebf0a",
+  "code": "def shipping_cost(order)\n  if order[:country] == \"US\"\n    standard, express = order[:weight] > 10 ? [20, 50] : [5, 25]\n  else\n    standard, express = order[:weight] > 10 ? [40, 100] : [15, 60]\n  end\n\n  order[:express] ? express : standard\nend\n",
+  "from_reply": false,
+  "reply": "Refactored `shipping_cost` in `shipping.rb` to select rates by country and weight, then choose between standard and express once. Verified that all eight rate combinations return the original prices, including orders weighing exactly 10.",
+  "tools": 3,
+  "seconds": 20.7,
+  "error": null
+}

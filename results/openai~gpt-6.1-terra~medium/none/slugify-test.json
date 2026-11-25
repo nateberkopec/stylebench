@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "slugify-test",
+  "fingerprint": "6291948ca4de89eacddda5a07ea6a8f1a1ec16deeae5d4733bd924cc9f7f92f1",
+  "code": "# Convert a title into a lowercase, hyphen-separated URL slug.\ndef slugify(title)\n  title.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/\\A-+|-+\\z/, '')\nend\n\nif $PROGRAM_NAME == __FILE__\n  require 'minitest/autorun'\n\n  class SlugifyTest < Minitest::Test\n    def test_slugifies_a_title\n      assert_equal 'hello-world', slugify('Hello, World!')\n    end\n\n    def test_removes_leading_and_trailing_separators\n      assert_equal 'ruby-123', slugify(' -- Ruby 123 -- ')\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `slugify.rb` with a `slugify` method and tests in the same file. The tests pass with `ruby slugify.rb`.",
+  "tools": 2,
+  "seconds": 12.8,
+  "error": null
+}

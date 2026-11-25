@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": "yagni",
+  "prompt": "money",
+  "fingerprint": "94cceb4cd4c4bdfdefef38ee5868477bbd7c7ba24d6f89d7c25f4a31fdba783b",
+  "code": "class Money\n  include Comparable\n\n  attr_reader :cents, :currency\n\n  def initialize(cents, currency = \"USD\")\n    @cents = cents\n    @currency = currency.dup.freeze\n    freeze\n  end\n\n  def <=>(other)\n    return nil unless other.is_a?(Money) && currency == other.currency\n\n    cents <=> other.cents\n  end\n\n  alias eql? ==\n\n  def hash\n    [cents, currency].hash\n  end\n\n  def to_s\n    whole, fraction = cents.abs.divmod(100)\n    sign = cents.negative? ? \"-\" : \"\"\n    format(\"%s %s%d.%02d\", currency, sign, whole, fraction)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Implemented an immutable `Money` value object in `money.rb`. It stores integer cents and defaults to USD.\n\n- Equality compares both the amount and currency.\n- Ordering works within the same currency; `<=>` returns `nil` for different currencies.\n- `Money.new(1234).to_s` returns `\"USD 12.34\"`.\n\nVerified equality, hash-key lookup, ordering, and formatting with a Ruby smoke test.",
+  "tools": 3,
+  "seconds": 25.7,
+  "error": null
+}

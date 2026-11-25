@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": null,
+  "prompt": "retry",
+  "fingerprint": "8ffa42048903018317b00de023f453c2e5aa9fe80f872c3b1c095e9e8e25aa6a",
+  "code": "# Retries a block after failures, waiting with exponential backoff between attempts.\nmodule RetryHelper\n  # max_attempts counts the initial call as well as retries.\n  def self.with_backoff(max_attempts: 3, initial_delay: 0.1, multiplier: 2,\n                        max_delay: nil, on: StandardError)\n    raise ArgumentError, \"max_attempts must be a positive integer\" unless\n      max_attempts.is_a?(Integer) && max_attempts.positive?\n    raise ArgumentError, \"initial_delay must be non-negative\" unless initial_delay >= 0\n    raise ArgumentError, \"multiplier must be at least 1\" unless multiplier >= 1\n    raise ArgumentError, \"max_delay must be non-negative\" if max_delay && max_delay < 0\n\n    attempts = 0\n    delay = initial_delay\n\n    begin\n      attempts += 1\n      yield\n    rescue *Array(on)\n      raise if attempts >= max_attempts\n\n      sleep(delay)\n      delay *= multiplier\n      delay = [delay, max_delay].min if max_delay\n      retry\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Added `RetryHelper.with_backoff` in `retry.rb`. It makes up to 3 attempts by default, doubles the delay between attempts, and lets you configure which exceptions to retry. Syntax check passed.",
+  "tools": 3,
+  "seconds": 37.3,
+  "error": null
+}

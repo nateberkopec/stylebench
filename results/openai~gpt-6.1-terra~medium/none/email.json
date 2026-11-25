@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "email",
+  "fingerprint": "15900e60c92d5911407814bdac19f4aeadb2a86a587b03d062ce0e67dcac09e9",
+  "code": "# Checks for a common email address shape, not full RFC validity.\ndef email?(string)\n  string.is_a?(String) && /\\A[^\\s@]+@[^\\s@]+\\.[^\\s@]+\\z/.match?(string)\nend\n",
+  "from_reply": false,
+  "reply": "Created `email.rb` with an `email?` method that checks for a common email address shape. It does not perform full RFC validation.",
+  "tools": 2,
+  "seconds": 13.1,
+  "error": null
+}

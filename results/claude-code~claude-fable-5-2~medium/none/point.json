@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": null,
+  "prompt": "point",
+  "fingerprint": "d0ad91b30289ba4676afb7393004e402cbf736958d1dcd09a7484093f0b86afe",
+  "code": "Point = Data.define(:x, :y) do\n  def distance_to(other)\n    Math.hypot(x - other.x, y - other.y)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "`point.rb` now defines `Point` as an immutable value object with a `distance_to` method; I haven't run it.\n\n```ruby\nPoint.new(0, 0).distance_to(Point.new(3, 4)) # => 5.0\n```\n\nIt uses `Data.define`, so it needs Ruby 3.2 or later. You get value equality and keyword construction (`Point.new(x: 1, y: 2)`) for free.",
+  "tools": 1,
+  "seconds": 4.4,
+  "error": null
+}

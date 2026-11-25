@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": "yagni",
+  "prompt": "lru",
+  "fingerprint": "3f9926909a09fa674c067e592fe0747707234854665ddea3b8062f6c58ebc6d3",
+  "code": "class LRUCache\n  def initialize(capacity)\n    @capacity = capacity\n    @store = {}\n  end\n\n  def get(key)\n    return unless @store.key?(key)\n\n    @store[key] = @store.delete(key)\n  end\n\n  def set(key, value)\n    @store.delete(key)\n    @store[key] = value\n    @store.delete(@store.first[0]) if @store.size > @capacity\n    value\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I wrote the cache in `lru_cache.rb`. I haven't run it.\n\nIt uses a Ruby Hash, which keeps keys in the order they were added:\n- **`get(key)`** returns the value and marks the key as most recently used by removing it and adding it back at the end. It returns `nil` if the key isn't there.\n- **`set(key, value)`** adds or updates the key as most recently used. If that takes the cache over capacity, it drops the oldest key.\n\nBoth are O(1).",
+  "tools": 1,
+  "seconds": 7.5,
+  "error": null
+}

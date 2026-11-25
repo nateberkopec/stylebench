@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "parse-duration",
+  "fingerprint": "9de22402e5f6c5e706b91be70e2df8bc3f2f30ac89dadea82cde69527a83aa7e",
+  "code": "def duration_in_seconds(duration)\n  unless duration.is_a?(String) && /\\A(?:[0-9]+[hms])+\\z/.match?(duration)\n    raise ArgumentError, 'expected a duration such as 1h30m or 45s'\n  end\n\n  seconds_per_unit = { 'h' => 3600, 'm' => 60, 's' => 1 }\n  duration.scan(/([0-9]+)([hms])/).sum do |amount, unit|\n    amount.to_i * seconds_per_unit.fetch(unit)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Added `duration_in_seconds` to `duration.rb`. It accepts whole-number hours (`h`), minutes (`m`), and seconds (`s`), and raises `ArgumentError` for malformed input.\n\nVerified that `\"1h30m\"` returns `5400` and `\"45s\"` returns `45`.",
+  "tools": 3,
+  "seconds": 20.9,
+  "error": null
+}

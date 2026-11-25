@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": "yagni",
+  "prompt": "memoize",
+  "fingerprint": "0bc11e1e5b12332d403c5d62166c7a232a7250098a9edd10fc68a39dae9810c7",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    @summary ||= begin\n      sleep 1\n      @rows.sum { |row| row[:total] }\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Memoized `summary` in `report.rb` so the expensive computation runs once per object:\n\n```ruby\ndef summary\n  @summary ||= begin\n    sleep 1\n    @rows.sum { |row| row[:total] }\n  end\nend\n```\n\nVerified: two calls take ~1s total instead of ~2s, returning `5` both times.",
+  "tools": 3,
+  "seconds": 44.6,
+  "error": null
+}

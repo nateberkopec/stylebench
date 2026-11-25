@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": "yagni",
+  "prompt": "retry",
+  "fingerprint": "7e765f45f4115855705fd2748d35350ac42800839496ef37f20179f1d6f245a2",
+  "code": "module Retry\n  def self.with_backoff(attempts: 3, base: 0.1, exceptions: StandardError)\n    tries = 0\n    begin\n      yield\n    rescue *exceptions\n      tries += 1\n      raise if tries >= attempts\n\n      sleep(base * 2**(tries - 1))\n      retry\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `retry.rb`:\n\n```ruby\nmodule Retry\n  def self.with_backoff(attempts: 3, base: 0.1, exceptions: StandardError)\n    tries = 0\n    begin\n      yield\n    rescue *exceptions\n      tries += 1\n      raise if tries >= attempts\n\n      sleep(base * 2**(tries - 1))\n      retry\n    end\n  end\nend\n```\n\nUsage:\n\n```ruby\nRetry.with_backoff { api.fetch }\nRetry.with_backoff(attempts: 5, base: 0.5, exceptions: [Net::ReadTimeout]) { api.fetch }\n```\n\nDelays are `base`, `base*2`, `base*4`, … and it re-raises the original exception once retries are exhausted. Verified: a block failing twice then succeeding returns on the 3rd try, and persistent failures raise after `attempts` tries.",
+  "tools": 3,
+  "seconds": 12.0,
+  "error": null
+}

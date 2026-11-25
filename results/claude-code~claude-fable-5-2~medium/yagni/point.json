@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": "yagni",
+  "prompt": "point",
+  "fingerprint": "89978df95ca42d91a0eda4edc6aa4a10ac29de75c0b833f6e70835ca89ebb14b",
+  "code": "Point = Struct.new(:x, :y) do\n  def distance_to(other)\n    Math.hypot(x - other.x, y - other.y)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "`point.rb` now defines `Point` as a `Struct` with `x` and `y` and a `distance_to` method; I haven't run it.\n\n```ruby\nPoint.new(0, 0).distance_to(Point.new(3, 4)) # => 5.0\n```",
+  "tools": 1,
+  "seconds": 3.6,
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": "yagni",
+  "prompt": "refactor-shipping",
+  "fingerprint": "6d96a255e19af9e5cb074726bde42de8955ab09fe7feb7c5fdb54055cc3c8acb",
+  "code": "def shipping_cost(order)\n  domestic = order[:country] == \"US\"\n  heavy = order[:weight] > 10\n  express = order[:express]\n\n  if domestic\n    return express ? 50 : 20 if heavy\n    return express ? 25 : 5\n  end\n\n  return express ? 100 : 40 if heavy\n  express ? 60 : 15\nend\n",
+  "from_reply": false,
+  "reply": "Refactored `shipping_cost` in `shipping.rb` to name the shipping conditions and replace three levels of nested branches with early returns. All 24 checks passed, covering domestic and international rates, the weight cutoff at 10, and Ruby’s truthiness rules for express shipping.",
+  "tools": 3,
+  "seconds": 28.4,
+  "error": null
+}

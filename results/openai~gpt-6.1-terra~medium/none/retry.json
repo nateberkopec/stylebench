@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "retry",
+  "fingerprint": "4ae08c44766e1517138925d8d0c487970e8a46a0263a758eaf127e2149799977",
+  "code": "# Runs the block up to max_attempts times, doubling the delay after each failure.\n# The last exception is re-raised if all attempts fail.\ndef with_retry(max_attempts: 3, base_delay: 0.1, on: StandardError)\n  raise ArgumentError, \"max_attempts must be a positive integer\" unless max_attempts.is_a?(Integer) && max_attempts.positive?\n  raise ArgumentError, \"base_delay must be non-negative\" unless base_delay.is_a?(Numeric) && base_delay >= 0\n\n  attempts = 0\n  begin\n    attempts += 1\n    yield\n  rescue *Array(on)\n    raise if attempts >= max_attempts\n\n    sleep(base_delay * (2**(attempts - 1)))\n    retry\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `retry.rb` with a `with_retry` helper. It defaults to three attempts, doubles the delay after each failure, and re-raises the last exception if all attempts fail. The attempt count, initial delay, and rescued exception type are configurable.\n\nVerified Ruby syntax and a successful retry.",
+  "tools": 3,
+  "seconds": 19.7,
+  "error": null
+}

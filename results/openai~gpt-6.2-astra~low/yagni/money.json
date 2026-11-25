@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": "yagni",
+  "prompt": "money",
+  "fingerprint": "9350a6b409080e1d079bbe42a3411171558fc36b7ad3bf5573f712322b5c2a37",
+  "code": "class Money < Data.define(:cents)\n  include Comparable\n\n  def <=>(other)\n    cents <=> other.cents if other.instance_of?(self.class)\n  end\n\n  def to_s\n    dollars, remainder = cents.abs.divmod(100)\n    format('%s$%d.%02d', cents.negative? ? '-' : '', dollars, remainder)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `money.rb` with an immutable `Money` value object that stores integer cents. It supports equality, ordering, and dollar formatting without floating-point arithmetic.\n\n```ruby\nMoney.new(125) == Money.new(125) # => true\nMoney.new(125) > Money.new(99)   # => true\nMoney.new(-125).to_s             # => \"-$1.25\"\n```\n\nVerified equality, comparison, formatting, and immutability in Ruby.",
+  "tools": 3,
+  "seconds": 25.3,
+  "error": null
+}

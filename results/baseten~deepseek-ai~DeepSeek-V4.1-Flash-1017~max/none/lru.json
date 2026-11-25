@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": null,
+  "prompt": "lru",
+  "fingerprint": "fff1f8c7c06eb408177a457a2aaf16470448f0e911aee3ce20801db604819bb7",
+  "code": "# A fixed-capacity least-recently-used cache.\n#\n# Ruby hashes preserve insertion order, so the first key is always the least\n# recently used. Reads and writes move their key to the end.\nclass LRUCache\n  attr_reader :capacity\n\n  def initialize(capacity)\n    unless capacity.is_a?(Integer) && capacity >= 0\n      raise ArgumentError, \"capacity must be a non-negative Integer\"\n    end\n\n    @capacity = capacity\n    @cache = {}\n  end\n\n  def get(key)\n    return nil unless @cache.key?(key)\n\n    value = @cache.delete(key)\n    @cache[key] = value\n    value\n  end\n  alias [] get\n\n  def put(key, value)\n    @cache.delete(key)\n    @cache[key] = value\n    @cache.shift while @cache.size > @capacity\n    value\n  end\n  alias []= put\n\n  def delete(key)\n    @cache.delete(key)\n  end\n\n  def key?(key)\n    @cache.key?(key)\n  end\n  alias include? key?\n\n  def size\n    @cache.size\n  end\n\n  def empty?\n    @cache.empty?\n  end\n\n  def clear\n    @cache.clear\n    self\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Implemented in `lru_cache.rb`.\n\nIt provides:\n\n- `get(key)` / `cache[key]`\n- `put(key, value)` / `cache[key] = value`\n- `delete`, `key?`/`include?`, `size`, `empty?`, and `clear`\n- Automatic eviction of the least recently used entry\n- Average O(1) reads and writes using an insertion-ordered hash\n\nSyntax and basic eviction behavior were verified with Ruby.",
+  "tools": 3,
+  "seconds": 29.4,
+  "error": null
+}

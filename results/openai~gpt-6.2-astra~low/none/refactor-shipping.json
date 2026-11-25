@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "refactor-shipping",
+  "fingerprint": "31e5f809ac80991155631eadc4560584e77726d1161c8816917a1d8e244f525a",
+  "code": "def shipping_cost(order)\n  domestic = order[:country] == \"US\"\n  heavy = order[:weight] > 10\n  express = order[:express]\n\n  if domestic\n    return express ? 50 : 20 if heavy\n    return express ? 25 : 5\n  end\n\n  return express ? 100 : 40 if heavy\n  express ? 60 : 15\nend\n",
+  "from_reply": false,
+  "reply": "Refactored `shipping_cost` in `shipping.rb` to replace nested conditionals with named conditions and early returns. Verified that all eight rate combinations are unchanged, including the 10-unit weight cutoff.",
+  "tools": 3,
+  "seconds": 20.7,
+  "error": null
+}

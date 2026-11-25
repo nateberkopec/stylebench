@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "memoize",
+  "fingerprint": "4be7dc3ce0089eb988a674e4f353609966e22c6dd4934d1bb89e7c6f7b13380d",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    return @summary if defined?(@summary)\n\n    sleep 1\n    @summary = @rows.sum { |row| row[:total] }\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Memoized `Report#summary` in `report.rb`. The first call computes the total; later calls on the same instance skip the delay and return the cached value. Changes to `rows` after the first call won’t affect that value.",
+  "tools": 2,
+  "seconds": 11.8,
+  "error": null
+}

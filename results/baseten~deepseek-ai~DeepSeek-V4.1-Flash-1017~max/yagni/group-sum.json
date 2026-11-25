@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": "yagni",
+  "prompt": "group-sum",
+  "fingerprint": "a710d30c5e2891012d27e485682e596f72fc102d541dd139edee2f910c2f9650",
+  "code": "def totals_by_category(entries)\n  entries.each_with_object(Hash.new(0)) do |entry, totals|\n    totals[entry[:category]] += entry[:amount]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Written to `totals.rb`:\n\n```ruby\ndef totals_by_category(entries)\n  entries.each_with_object(Hash.new(0)) do |entry, totals|\n    totals[entry[:category]] += entry[:amount]\n  end\nend\n```\n\nVerified: `[{category: \"food\", amount: 12}, {category: \"food\", amount: 3}, {category: \"rent\", amount: 100}]` → `{\"food\" => 15, \"rent\" => 100}`.",
+  "tools": 3,
+  "seconds": 18.7,
+  "error": null
+}

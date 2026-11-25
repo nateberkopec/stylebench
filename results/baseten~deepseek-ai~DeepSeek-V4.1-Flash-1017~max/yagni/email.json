@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": "yagni",
+  "prompt": "email",
+  "fingerprint": "b9473b595b316daa5d01b8f2a68ea1f34fb3b518f58343a053b4123eaa4558a1",
+  "code": "def email?(string)\n  string.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)\nend\n",
+  "from_reply": false,
+  "reply": "`email.rb`:\n\n```ruby\ndef email?(string)\n  string.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)\nend\n```\n\nRequires a local part, `@`, and a domain containing at least one dot, with no whitespace or extra `@`. Verified: `a@b.com` → true; `nope` and `a b@c.com` → false.",
+  "tools": 3,
+  "seconds": 9.9,
+  "error": null
+}

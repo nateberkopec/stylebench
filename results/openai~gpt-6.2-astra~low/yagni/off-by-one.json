@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": "yagni",
+  "prompt": "off-by-one",
+  "fingerprint": "4bb3af0e068565da3b55071006f5a8c188ab3da89c31000a8209e23804463482",
+  "code": "def last_n(items, n)\n  items.last(n)\nend\n",
+  "from_reply": false,
+  "reply": "Fixed the off-by-one error in `last_n.rb` by using `items.last(n)`. Verified that `n = 2` returns the last two items, `n = 0` returns an empty array, and an oversized `n` returns all items.",
+  "tools": 3,
+  "seconds": 19.1,
+  "error": null
+}

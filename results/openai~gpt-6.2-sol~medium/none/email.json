@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": null,
+  "prompt": "email",
+  "fingerprint": "3eedabd853565a634e378032eb94c37dc3c3b11528a355f3bf47fb199e054158",
+  "code": "def valid_email?(value)\n  return false unless value.is_a?(String)\n\n  atom = /[a-z0-9!\\#$%&'*+\\/=?^_`{|}~-]+/i\n  label = /[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?/i\n\n  /\\A#{atom}(?:\\.#{atom})*@#{label}(?:\\.#{label})+\\z/.match?(value)\nend\n",
+  "from_reply": false,
+  "reply": "Added `valid_email?(value)` to `email.rb`. It returns `true` for common email formats like `alice+tag@example.com` and `false` for malformed addresses or non-string inputs.\n\nIt checks format only, not whether the address exists. All 8 smoke checks passed.",
+  "tools": 3,
+  "seconds": 30.8,
+  "error": null
+}

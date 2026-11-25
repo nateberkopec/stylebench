@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": null,
+  "prompt": "memoize",
+  "fingerprint": "283df6ef1170b391c9da34162bab5ac1f759d0366718e76c02444555e85d26f5",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    @summary ||= begin\n      sleep 1\n      @rows.sum { |row| row[:total] }\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Memoized `Report#summary` in `report.rb`:\n\n```ruby\ndef summary\n  @summary ||= begin\n    sleep 1\n    @rows.sum { |row| row[:total] }\n  end\nend\n```\n\nFirst call computes and caches; subsequent calls return the cached value. Verified two calls take ~1s total instead of ~2s.\n\nNote: the cache won't reflect mutations to `@rows` after the first call. If rows can change, add a `@summary = nil` invalidation method or reset it in a setter.",
+  "tools": 4,
+  "seconds": 17.0,
+  "error": null
+}

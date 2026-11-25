@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": null,
+  "prompt": "email",
+  "fingerprint": "39911d94a7469c5069ed69915e9d61e0433ddb929755c1c3ff3ced6426ab537c",
+  "code": "EMAIL_PATTERN = /\\A[A-Z0-9!#$%&'*+\\/?=^_`{|}~-]+(?:\\.[A-Z0-9!#$%&'*+\\/?=^_`{|}~-]+)*@(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\.)+[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\z/i\n\n# Returns true when +value+ has the basic shape of an email address.\n# This checks syntax only; it does not verify that the address exists.\ndef valid_email?(value)\n  value.is_a?(String) && EMAIL_PATTERN.match?(value)\nend\n",
+  "from_reply": false,
+  "reply": "Added `valid_email?` in `email.rb`. It checks the basic shape of an email address and returns `false` for non-strings; it does not verify deliverability. Ruby syntax and a few basic cases pass.",
+  "tools": 8,
+  "seconds": 63.8,
+  "error": null
+}

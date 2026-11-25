@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": "yagni",
+  "prompt": "parse-duration",
+  "fingerprint": "063df05baa571019b3d7b67ad35f5ca3aeced6ba3406eabad9cccb46c2fe4590",
+  "code": "UNITS = { \"h\" => 3600, \"m\" => 60, \"s\" => 1 }.freeze\n\ndef parse_duration(str)\n  str.scan(/(\\d+)([hms])/).sum { |n, u| n.to_i * UNITS[u] }\nend\n",
+  "from_reply": false,
+  "reply": "I added `parse_duration` to `duration.rb`. I tested it on your two examples: `\"1h30m\"` gives 5400 and `\"45s\"` gives 45.\n\n```ruby\nUNITS = { \"h\" => 3600, \"m\" => 60, \"s\" => 1 }.freeze\n\ndef parse_duration(str)\n  str.scan(/(\\d+)([hms])/).sum { |n, u| n.to_i * UNITS[u] }\nend\n```\n\nIt only reads whole numbers followed by `h`, `m` or `s`, and silently skips anything else. So `\"abc\"` returns 0, and in `\"1.5h\"` it only reads the `5h`, giving 18000.",
+  "tools": 2,
+  "seconds": 6.9,
+  "error": null
+}

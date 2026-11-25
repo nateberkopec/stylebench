@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": "yagni",
+  "prompt": "top-csv",
+  "fingerprint": "b6bc7c9fcb588d790717bbc76364bbb97d4127459be03e304945e9c51dfe1a75",
+  "code": "require 'csv'\n\ndef top_rows(path, column)\n  CSV.read(path, headers: true).sort_by { |row| -Float(row[column]) }.first(5)\nend\n",
+  "from_reply": false,
+  "reply": "Created `top_rows.rb` with `top_rows(path, column)`. It returns up to five `CSV::Row` objects, sorted by the column’s numeric value in descending order. The CSV must have a header row.",
+  "tools": 1,
+  "seconds": 6.4,
+  "error": null
+}

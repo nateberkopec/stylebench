@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": "yagni",
+  "prompt": "memoize",
+  "fingerprint": "c63b8a7b3a189b94cd07d31856dbb0ca9f4d4ffa48fee995b09a5ff19b564e9d",
+  "code": "class Report\n  def initialize(rows)\n    @rows = rows\n  end\n\n  def summary\n    @summary ||= begin\n      sleep 1\n      @rows.sum { |row| row[:total] }\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I changed `Report#summary` in `report.rb` so it stores its result with `@summary ||=`. The first call still takes about a second, and later calls on the same object return the stored value immediately. I haven't run it.\n\nThe stored value won't change if `@rows` is modified after the first call. With `||=`, a `nil` or `false` result would be recalculated on each call, but a sum won't return either of those.",
+  "tools": 2,
+  "seconds": 11.7,
+  "error": null
+}

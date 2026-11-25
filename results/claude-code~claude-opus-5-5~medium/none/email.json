@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": null,
+  "prompt": "email",
+  "fingerprint": "a3ce2fd139e24574b3ddfb88885e5820cf904b469cbca604f8c77c0b7f7b38f0",
+  "code": "# Returns true if the string looks like an email address.\n# This is a pragmatic check (local@domain.tld), not full RFC 5322 validation.\nEMAIL_PATTERN = /\\A[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+\\z/\n\ndef email?(str)\n  return false unless str.is_a?(String)\n\n  EMAIL_PATTERN.match?(str)\nend\n",
+  "from_reply": false,
+  "reply": "I wrote `email?(str)` in `email.rb`. It returns true for strings of the form `local@domain.tld`:\n\n```ruby\nEMAIL_PATTERN = /\\A[^@\\s]+@[^@\\s.]+(\\.[^@\\s.]+)+\\z/\n\ndef email?(str)\n  return false unless str.is_a?(String)\n  EMAIL_PATTERN.match?(str)\nend\n```\n\nThe rules it applies:\n- There must be exactly one `@`, with something on both sides.\n- There can't be any whitespace.\n- The domain needs at least one dot, with no empty parts (so `a@b..co` fails).\n- Anything that isn't a string, like `nil`, returns false.\n\nI ran a quick check. `a@b.co` and `foo.bar+x@ex.co.uk` passed. `a@b`, `@b.co`, `a@@b.co`, `a@b..co`, `a b@c.co` and `nil` were rejected.\n\nThis checks the shape of the string, not full RFC 5322 rules. For example, it rejects quoted local parts and accepts some odd characters. The only way to know an address is real is to send mail to it.",
+  "tools": 2,
+  "seconds": 11.5,
+  "error": null
+}

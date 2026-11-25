@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": null,
+  "prompt": "counter",
+  "fingerprint": "62bf84eeb30987fc3407aff021cfac5429ef5d170827ab29ca014f9cf1dc0832",
+  "code": "# frozen_string_literal: true\n\n# A thread-safe counter. All reads and writes are protected by a mutex.\nclass Counter\n  def initialize(initial = 0)\n    @value = initial\n    @mutex = Mutex.new\n  end\n\n  # Increments the counter and returns the new value.\n  def increment(amount = 1)\n    @mutex.synchronize { @value += amount }\n  end\n\n  # Decrements the counter and returns the new value.\n  def decrement(amount = 1)\n    @mutex.synchronize { @value -= amount }\n  end\n\n  # Returns the current value.\n  def value\n    @mutex.synchronize { @value }\n  end\n\n  # Sets the counter to +new_value+ and returns it.\n  def reset(new_value = 0)\n    @mutex.synchronize { @value = new_value }\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `counter.rb` with a mutex-protected `Counter` class supporting:\n\n- `increment(amount = 1)`\n- `decrement(amount = 1)`\n- `value`\n- `reset(new_value = 0)`\n\nVerified with 10 threads performing 100,000 increments total.",
+  "tools": 2,
+  "seconds": 11.3,
+  "error": null
+}

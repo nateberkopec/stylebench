@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": "yagni",
+  "prompt": "request-id",
+  "fingerprint": "be126b34bb02574d5587447b3e539089ba02ad6d492bf8a1269b4cf5303f4e4f",
+  "code": "require \"securerandom\"\n\nclass RequestId\n  def initialize(app)\n    @app = app\n  end\n\n  def call(env)\n    status, headers, body = @app.call(env)\n    [status, headers.merge(\"x-request-id\" => SecureRandom.uuid), body]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created [`request_id.rb`](request_id.rb). Add `use RequestId` to `config.ru` to give every response a fresh UUID in its `X-Request-Id` header. The header name is lowercase in the response hash for Rack 3 compatibility.\n\nVerified syntax and confirmed that consecutive responses get distinct IDs.",
+  "tools": 3,
+  "seconds": 21.6,
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": null,
+  "prompt": "top-csv",
+  "fingerprint": "eac0a67ce56072b2f829e09c103b665187efa4540b6e7bd36e89df6357c083fa",
+  "code": "require 'csv'\nrequire 'bigdecimal'\n\n# Returns up to five CSV::Row objects, highest numeric value first.\ndef top_rows(path, column)\n  table = CSV.read(path, headers: true)\n  column = column.to_s\n  raise ArgumentError, \"Unknown CSV column: #{column}\" unless table.headers.include?(column)\n\n  table.sort_by { |row| -BigDecimal(row[column].to_s) }.first(5)\nend\n",
+  "from_reply": false,
+  "reply": "Added `top_rows(path, column)` to `top_rows.rb`. It reads a CSV with headers and returns up to five `CSV::Row` objects, ordered from highest to lowest numeric value in the specified column.\n\n```ruby\ntop_rows(\"scores.csv\", \"score\")\n```\n\nVerified the syntax and tested the ranking with integers, decimals, and a negative value.",
+  "tools": 2,
+  "seconds": 20.3,
+  "error": null
+}

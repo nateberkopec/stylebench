@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.1-terra:medium",
+  "variant": null,
+  "prompt": "counter",
+  "fingerprint": "81ef7d00b9572efa10b816b717ffe9caf942b850462240ff09c499194ace570c",
+  "code": "require 'thread'\n\nclass Counter\n  def initialize(initial_value = 0)\n    @value = initial_value\n    @mutex = Mutex.new\n  end\n\n  def value\n    @mutex.synchronize { @value }\n  end\n\n  def increment\n    @mutex.synchronize { @value += 1 }\n  end\n\n  def decrement\n    @mutex.synchronize { @value -= 1 }\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `counter.rb` with a mutex-protected `Counter` class. It supports reading the value, incrementing, decrementing, and setting an initial value.",
+  "tools": 1,
+  "seconds": 11.1,
+  "error": null
+}

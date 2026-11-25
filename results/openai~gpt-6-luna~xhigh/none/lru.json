@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": null,
+  "prompt": "lru",
+  "fingerprint": "a7049e3aa2b23ca2b6771c64b210e3c8e0475c2755931959bd2fd1e8e5e90557",
+  "code": "class LRUCache\n  def initialize(capacity)\n    raise ArgumentError, \"capacity must be a non-negative integer\" unless capacity.is_a?(Integer) && capacity >= 0\n\n    @capacity = capacity\n    @entries = {}\n  end\n\n  # Returns the value for key, or nil if the key is not cached.\n  # Accessing a key makes it the most recently used entry.\n  def get(key)\n    return nil unless @entries.key?(key)\n\n    value = @entries.delete(key)\n    @entries[key] = value\n    value\n  end\n\n  # Adds or updates a key/value pair, evicting the least recently used entry\n  # when the cache is full.\n  def put(key, value)\n    return if @capacity.zero?\n\n    @entries.delete(key)\n    @entries[key] = value\n    @entries.shift if @entries.size > @capacity\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `lru_cache.rb` with an `LRUCache` class. It provides `get(key)` and `put(key, value)`, evicts the least recently used entry when full, and supports zero capacity.",
+  "tools": 2,
+  "seconds": 17.0,
+  "error": null
+}

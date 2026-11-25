@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": null,
+  "prompt": "parse-duration",
+  "fingerprint": "07b9e512320a039206f78b67932f6dd2ddd78e474c838e98fb74d49b65cfa1a4",
+  "code": "SECONDS_PER_UNIT = { \"h\" => 3600, \"m\" => 60, \"s\" => 1 }.freeze\n\n# Converts a duration string like \"1h30m\" or \"45s\" into a number of seconds.\n# Raises ArgumentError if the string is not a sequence of <integer><h|m|s> parts.\ndef parse_duration(string)\n  unless string.match?(/\\A(?:\\d+[hms])+\\z/)\n    raise ArgumentError, \"invalid duration: #{string.inspect}\"\n  end\n\n  string.scan(/(\\d+)([hms])/).sum { |amount, unit| amount.to_i * SECONDS_PER_UNIT.fetch(unit) }\nend\n",
+  "from_reply": false,
+  "reply": "`parse_duration` is in `duration.rb`; a quick run gave 5400 for `\"1h30m\"`, 45 for `\"45s\"` and 7510 for `\"2h5m10s\"`.\n\nIt accepts any sequence of whole-number `h`, `m` and `s` parts and raises `ArgumentError` on anything else, including the empty string, whitespace, decimals like `\"1.5h\"` and uppercase units. It does not enforce order or uniqueness, so `\"30m1h\"` and `\"1m1m\"` are accepted and summed.",
+  "tools": 2,
+  "seconds": 8.6,
+  "error": null
+}

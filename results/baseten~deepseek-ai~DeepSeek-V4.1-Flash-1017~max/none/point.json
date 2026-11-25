@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": null,
+  "prompt": "point",
+  "fingerprint": "77e2e51cec8db05288e333b95ddc4ee413a07bc48b2f447ee0b4a7db6bc3c13a",
+  "code": "# A point in two-dimensional space.\nclass Point\n  attr_reader :x, :y\n\n  def initialize(x, y)\n    @x = x\n    @y = y\n  end\n\n  # Euclidean distance to +other+.\n  def distance_to(other)\n    Math.hypot(x - other.x, y - other.y)\n  end\n\n  def ==(other)\n    other.is_a?(Point) && x == other.x && y == other.y\n  end\n  alias eql? ==\n\n  def hash\n    [x, y].hash\n  end\n\n  def to_s\n    \"(#{x}, #{y})\"\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `point.rb`:\n\n```ruby\np1 = Point.new(0, 0)\np2 = Point.new(3, 4)\np1.distance_to(p2)  # => 5.0\n```\n\n- `Point#distance_to(other)` uses `Math.hypot` for the Euclidean distance\n- `attr_reader :x, :y` with a simple constructor\n- Value semantics via `==`, `eql?`, and `hash`, plus a `to_s`\n\nVerified by loading the file in Ruby 3.x — distance, equality, and formatting all behave as expected.",
+  "tools": 3,
+  "seconds": 13.6,
+  "error": null
+}

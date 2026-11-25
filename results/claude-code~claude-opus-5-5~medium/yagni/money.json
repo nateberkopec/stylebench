@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": "yagni",
+  "prompt": "money",
+  "fingerprint": "aedf17eb5769474a5b4274cfbffcfcbf6a75a2de721d86d0adfe90e2131b2139",
+  "code": "class Money\n  include Comparable\n\n  attr_reader :cents, :currency\n\n  def initialize(cents, currency = \"USD\")\n    @cents = cents\n    @currency = currency\n    freeze\n  end\n\n  def <=>(other)\n    return unless other.is_a?(Money) && currency == other.currency\n    cents <=> other.cents\n  end\n\n  def eql?(other)\n    self == other\n  end\n\n  def hash\n    [cents, currency].hash\n  end\n\n  def to_s\n    sign = cents.negative? ? \"-\" : \"\"\n    dollars, remainder = cents.abs.divmod(100)\n    format(\"%s%d.%02d %s\", sign, dollars, remainder, currency)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I wrote the `Money` class in `money.rb`. I tried equality, comparison, a negative amount and mixed currencies with a quick one-liner, and all four gave the expected results.\n\n- **Storage:** amounts are whole cents (integers) plus a currency code, which defaults to `\"USD\"`. Objects can't be changed after they're created.\n- **Equality and comparison:** it supports `==`, `<`, `>` and `between?`. Two amounts are only equal or comparable if they have the same currency.\n- **Different currencies:** `Money.new(1, \"EUR\") == Money.new(1)` returns `false`, but using `<` or `>` across currencies raises an `ArgumentError`.\n- **Hash keys:** equal amounts can be used interchangeably as hash keys.\n- **Formatting:** `Money.new(-1234).to_s` gives `\"-12.34 USD\"`. It always shows two decimal places and the currency code after the number. It doesn't add currency symbols or thousands separators.",
+  "tools": 2,
+  "seconds": 9.8,
+  "error": null
+}

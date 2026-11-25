@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": "yagni",
+  "prompt": "lru",
+  "fingerprint": "6a406a2befcd5b83cda771af497846f3469d09f6d2505fa3a80d9d5468f8ef45",
+  "code": "class LRUCache\n  def initialize(capacity)\n    @capacity = capacity\n    @cache = {}\n  end\n\n  def get(key)\n    return nil unless @cache.key?(key)\n\n    value = @cache.delete(key)\n    @cache[key] = value\n  end\n\n  def put(key, value)\n    @cache.delete(key)\n    @cache[key] = value\n    @cache.shift if @cache.length > @capacity\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `lru_cache.rb` with an `LRUCache` class. It uses `get(key)` to retrieve and refresh an entry, and `put(key, value)` to insert or update while evicting the least recently used entry when over capacity.",
+  "tools": 2,
+  "seconds": 19.2,
+  "error": null
+}

@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": "yagni",
+  "prompt": "email",
+  "fingerprint": "e3cf12d4f25891d1f9dd908a60566a259c4bac5491f3ad2f8330c8afe625c1cf",
+  "code": "def email?(string)\n  string.match?(/\\A[^@\\s]+@[^@\\s]+\\.[^@\\s]+\\z/)\nend\n",
+  "from_reply": false,
+  "reply": "`email.rb` now defines `email?(string)`, which returns true when the string has the shape `something@something.something` with no whitespace and exactly one `@`. I haven't run it.\n\nIt is a loose shape check, not full RFC validation, so it accepts things like `a@b.c`.",
+  "tools": 1,
+  "seconds": 4.5,
+  "error": null
+}

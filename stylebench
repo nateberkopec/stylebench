@@ -92,31 +92,59 @@ def run_one(model, variant, prompt)
   end
 end
 
-def run(models, variant, force, only, jobs)
+def cached?(model, variant, prompt)
+  path = result_path(model, variant, prompt)
+  return false unless File.exist?(path)
+  result = JSON.parse(File.read(path))
+  result["fingerprint"] == fingerprint(model, variant, prompt) && !result["error"]
+end
+
+def average_seconds(model)
+  times = Dir[File.join(RESULTS, model.gsub(/[\/:]/, "~"), "*", "*.json")].map { |f| JSON.parse(File.read(f))["seconds"] }
+  times.empty? ? Float::INFINITY : times.sum / times.size
+end
+
+def run(models, variants, force, only, jobs, per_provider)
   prompts = Prompt.all
   prompts.select! { |p| only.include?(p.id) } if only.any?
-  work = models.product(prompts).reject do |model, prompt|
-    path = result_path(model, variant, prompt)
-    !force && File.exist?(path) && JSON.parse(File.read(path))["fingerprint"] == fingerprint(model, variant, prompt) &&
-      !JSON.parse(File.read(path))["error"]
-  end
-  puts "#{work.size} runs to do, #{models.size * prompts.size - work.size} cached"
-  queue = Queue.new
-  work.each { |w| queue << w }
-  queue.close
+  models = models.sort_by { |m| -average_seconds(m) }
+  work = prompts.product(variants, models).map { |p, v, m| [m, v, p] }
+  all = work.size
+  work.reject! { |m, v, p| cached?(m, v, p) } unless force
+  total = work.size
+  puts "#{total} runs to do, #{all - total} cached"
   lock = Mutex.new
+  slots = Hash.new(0)
+  freed = ConditionVariable.new
   done = 0
+  take = lambda do
+    lock.synchronize do
+      loop do
+        return nil if work.empty?
+        index = work.index { |m, _, _| slots[m.split("/").first] < per_provider }
+        if index
+          job = work.delete_at(index)
+          slots[job[0].split("/").first] += 1
+          return job
+        end
+        freed.wait(lock)
+      end
+    end
+  end
   Array.new(jobs) do
     Thread.new do
-      while (model, prompt = queue.pop)
+      while (job = take.call)
+        model, variant, prompt = job
         result = run_one(model, variant, prompt)
         path = result_path(model, variant, prompt)
         FileUtils.mkdir_p(File.dirname(path))
         File.write(path, JSON.pretty_generate(result))
         lock.synchronize do
+          slots[model.split("/").first] -= 1
+          freed.broadcast
           done += 1
           status = result[:error] ? "error: #{result[:error].lines.first&.strip}" : "#{result[:seconds]}s"
-          puts "[#{done}/#{work.size}] #{model} #{variant || "-"} #{prompt.id} #{status}"
+          puts "[#{done}/#{total}] #{model} #{variant || "-"} #{prompt.id} #{status}"
         end
       end
     end
@@ -180,7 +208,7 @@ def build
     end,
   }
   html = File.read(File.join(ROOT, "lib", "template.html"))
-    .sub("/*DATA*/null", JSON.generate(data).gsub("</", "<\\/"))
+    .sub("/*DATA*/null") { JSON.generate(data).gsub("</") { "<\\/" } }
   File.write(File.join(ROOT, "index.html"), html)
   File.join(ROOT, "index.html")
 end
@@ -188,16 +216,18 @@ end
 command = ARGV.shift
 case command
 when "run"
-  opts = { variant: nil, force: false, only: [], jobs: 8 }
+  opts = { variants: [], force: false, only: [], jobs: 32, per_provider: 12 }
   OptionParser.new do |o|
     o.banner = "Usage: stylebench run [MODEL...] [options]"
-    o.on("--variant NAME", "Append variants/NAME.md to the system prompt") { |v| opts[:variant] = v }
+    o.on("--variant NAME", "Append variants/NAME.md to the system prompt; 'none' for no variant (repeatable)") { |v| opts[:variants] << v }
     o.on("--force", "Rerun even if a result is cached") { opts[:force] = true }
     o.on("--only PROMPT", "Only run this prompt (repeatable)") { |v| opts[:only] << v }
-    o.on("-j N", Integer, "Parallel runs (default 8)") { |v| opts[:jobs] = v }
+    o.on("-j N", Integer, "Parallel runs (default 32)") { |v| opts[:jobs] = v }
+    o.on("--per-provider N", Integer, "Parallel runs per provider (default 12)") { |v| opts[:per_provider] = v }
   end.parse!
-  abort "No variant at variants/#{opts[:variant]}.md" if opts[:variant] && !variant_text(opts[:variant])
-  run(ARGV.empty? ? CONFIG.fetch("models") : ARGV, opts[:variant], opts[:force], opts[:only], opts[:jobs])
+  variants = (opts[:variants].empty? ? ["none"] : opts[:variants]).map { |v| v == "none" ? nil : v }
+  variants.compact.each { |v| abort "No variant at variants/#{v}.md" unless File.exist?(File.join(ROOT, "variants", "#{v}.md")) }
+  run(ARGV.empty? ? CONFIG.fetch("models") : ARGV, variants, opts[:force], opts[:only], opts[:jobs], opts[:per_provider])
   puts "Built #{build}"
 when "build"
   puts "Built #{build}"
@@ -206,7 +236,7 @@ when "open"
 else
   abort <<~USAGE
     Usage:
-      stylebench run [MODEL...] [--variant NAME] [--force] [--only PROMPT] [-j N]
+      stylebench run [MODEL...] [--variant NAME|none]... [--force] [--only PROMPT] [-j N] [--per-provider N]
       stylebench build
       stylebench open
   USAGE

@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": "yagni",
+  "prompt": "parse-duration",
+  "fingerprint": "31b18f4e4971f29a1cc914c67d59a76f1e2e52eef64c87bd487152ee3d4ae85e",
+  "code": "def duration_to_seconds(duration)\n  seconds_per_unit = { 'h' => 3600, 'm' => 60, 's' => 1 }\n  duration.scan(/(\\d+)([hms])/).sum do |amount, unit|\n    amount.to_i * seconds_per_unit[unit]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Added `duration_to_seconds` to `duration.rb`. It converts hours, minutes, and seconds to an integer total. Verified that `\"1h30m\"` returns `5400` and `\"45s\"` returns `45`.",
+  "tools": 3,
+  "seconds": 15.4,
+  "error": null
+}

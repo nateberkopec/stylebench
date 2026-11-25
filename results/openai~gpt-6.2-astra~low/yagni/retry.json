@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": "yagni",
+  "prompt": "retry",
+  "fingerprint": "aafb7f21a003bb124f8b76a3a8f8a147cae0e7c3e839ef074abec0d466ea587e",
+  "code": "def retry_with_backoff\n  retries = 0\n  begin\n    yield\n  rescue StandardError\n    raise if retries >= 3\n\n    sleep(0.1 * 2**retries)\n    retries += 1\n    retry\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Added `retry_with_backoff` in `retry.rb`. It retries a block up to three times after a `StandardError`, waiting 0.1, 0.2, then 0.4 seconds. It returns the block’s value on success and re-raises the last error if all four attempts fail. Verified both outcomes.",
+  "tools": 3,
+  "seconds": 20.1,
+  "error": null
+}

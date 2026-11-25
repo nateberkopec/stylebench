@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "cli",
+  "fingerprint": "5f4b119da74e6885869f2334a1dc5c6990a9e06bf98759504ff3225892b45047",
+  "code": "#!/usr/bin/env ruby\n\nrequire 'optparse'\n\nverbose = false\nparser = OptionParser.new do |opts|\n  opts.banner = 'Usage: wordcount.rb [--verbose] FILE'\n  opts.on('--verbose', 'Also print the line count') { verbose = true }\nend\n\nbegin\n  parser.permute!(ARGV)\n  abort parser.to_s unless ARGV.size == 1\n\n  words = 0\n  lines = 0\n  File.foreach(ARGV.first) do |line|\n    words += line.split.size\n    lines += 1\n  end\n\n  puts \"Words: #{words}\"\n  puts \"Lines: #{lines}\" if verbose\nrescue OptionParser::ParseError, SystemCallError => e\n  abort e.message\nend\n",
+  "from_reply": false,
+  "reply": "Created `wordcount.rb`. Run `./wordcount.rb FILE` to print the word count, or `./wordcount.rb --verbose FILE` to also print the line count. Both modes were tested.",
+  "tools": 3,
+  "seconds": 22.1,
+  "error": null
+}

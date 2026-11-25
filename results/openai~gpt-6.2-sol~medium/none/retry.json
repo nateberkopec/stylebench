@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-sol:medium",
+  "variant": null,
+  "prompt": "retry",
+  "fingerprint": "2e935c9eca8e1745b3aa28b1f01fe41b79e85257bd28a798a57dc3c2333b4200",
+  "code": "# Runs the block up to `attempts` times, including the initial call.\n# Delays are in seconds and double after each retryable failure.\ndef with_retry(attempts: 3, base_delay: 0.1, on: StandardError)\n  unless attempts.is_a?(Integer) && attempts.positive?\n    raise ArgumentError, \"attempts must be a positive integer\"\n  end\n\n  retryable_errors = Array(on)\n  remaining = attempts - 1\n  delay = base_delay\n\n  begin\n    yield\n  rescue *retryable_errors\n    raise if remaining.zero?\n\n    sleep(delay)\n    remaining -= 1\n    delay *= 2\n    retry\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Added `with_retry` in `retry.rb`. It tries the block up to three times by default, waiting 0.1 seconds before the first retry and 0.2 seconds before the second. It returns the block’s result on success and re-raises the last error if all attempts fail.\n\n```ruby\nrequire_relative \"retry\"\n\nwith_retry(attempts: 4, base_delay: 0.25, on: IOError) do\n  fetch_data\nend\n```\n\nVerified the backoff timing, final error propagation, and that errors outside `on:` aren’t retried.",
+  "tools": 3,
+  "seconds": 31.2,
+  "error": null
+}

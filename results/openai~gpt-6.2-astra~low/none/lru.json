@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "lru",
+  "fingerprint": "d2e197d2f9fc97c4b0e7c81c9b4e69d2c067e63595cc7a9215a5081d079f63df",
+  "code": "class LRUCache\n  def initialize(capacity)\n    unless capacity.is_a?(Integer) && capacity >= 0\n      raise ArgumentError, \"capacity must be a non-negative integer\"\n    end\n\n    @capacity = capacity\n    @entries = {}\n  end\n\n  def get(key)\n    return nil unless @entries.key?(key)\n\n    # Reinsert the entry at the most recently used end of the hash.\n    @entries[key] = @entries.delete(key)\n  end\n\n  def put(key, value)\n    @entries.delete(key)\n    @entries[key] = value\n    @entries.shift if @entries.size > @capacity\n    value\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `lru_cache.rb` with `LRUCache.new(capacity)`, `get(key)`, and `put(key, value)`. Reads and writes mark an entry as recently used. Inserting beyond capacity evicts the least recently used entry, and missing keys return `nil`.\n\nVerified eviction order, updates, and zero-capacity behavior.",
+  "tools": 3,
+  "seconds": 22.9,
+  "error": null
+}

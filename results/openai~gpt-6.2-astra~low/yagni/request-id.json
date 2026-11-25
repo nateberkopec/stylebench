@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": "yagni",
+  "prompt": "request-id",
+  "fingerprint": "75d807540df8fae2086a4d3250907a5cd4af0ceba1a414caf12f7587345598dd",
+  "code": "require 'securerandom'\n\nclass RequestId\n  def initialize(app)\n    @app = app\n  end\n\n  def call(env)\n    status, headers, body = @app.call(env)\n    [status, headers.merge('x-request-id' => SecureRandom.uuid), body]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `request_id.rb` with `RequestId` middleware. It adds a fresh UUID to every response using `x-request-id`, the lowercase header name required by Rack 3.\n\nRegister it in `config.ru` before `run`:\n\n```ruby\nrequire_relative 'request_id'\nuse RequestId\n```",
+  "tools": 2,
+  "seconds": 14.4,
+  "error": null
+}

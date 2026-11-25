@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6.2-astra:low",
+  "variant": null,
+  "prompt": "money",
+  "fingerprint": "f99948fad63744f42880b6ded19e90e2570bd71e54e243e33be1a767f8a0e9e8",
+  "code": "# frozen_string_literal: true\n\n# A dollar amount stored as integer cents.\nclass Money\n  include Comparable\n\n  attr_reader :cents\n\n  def initialize(cents)\n    raise ArgumentError, 'cents must be an integer' unless cents.is_a?(Integer)\n\n    @cents = cents\n    freeze\n  end\n\n  def <=>(other)\n    cents <=> other.cents if other.instance_of?(self.class)\n  end\n\n  alias eql? ==\n\n  def hash\n    [self.class, cents].hash\n  end\n\n  def to_s\n    dollars, remainder = cents.abs.divmod(100)\n    format('%s$%d.%02d', cents.negative? ? '-' : '', dollars, remainder)\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `money.rb` with an immutable `Money` value object that stores integer cents. It supports value equality, ordering, and use as a hash key. `Money.new(1250).to_s` returns `\"$12.50\"`.\n\nVerified equality, comparison, hash lookup, and negative-amount formatting.",
+  "tools": 3,
+  "seconds": 22.9,
+  "error": null
+}

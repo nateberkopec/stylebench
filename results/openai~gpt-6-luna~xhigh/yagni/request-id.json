@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": "yagni",
+  "prompt": "request-id",
+  "fingerprint": "bde89af8e69aa9c02ebf4feca32de364ac926e48b89b9524ba8f80838c69ee83",
+  "code": "require \"securerandom\"\n\nclass RequestId\n  def initialize(app)\n    @app = app\n  end\n\n  def call(env)\n    status, headers, body = @app.call(env)\n    headers[\"X-Request-Id\"] = SecureRandom.uuid\n    [status, headers, body]\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `request_id.rb` with Rack middleware that adds a generated `X-Request-Id` header to every response.",
+  "tools": 2,
+  "seconds": 16.0,
+  "error": null
+}

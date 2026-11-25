@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-fable-5-2:medium",
+  "variant": null,
+  "prompt": "retry",
+  "fingerprint": "2be7cb8fd2b5759fd25ead2b15f454a3b42163e741f9bb8de9455a1d026744e3",
+  "code": "# frozen_string_literal: true\n\nmodule Retry\n  # Runs the block, retrying on failure with exponential backoff.\n  #\n  #   Retry.with_backoff(attempts: 5, on: [Net::ReadTimeout]) { fetch }\n  #\n  # attempts:   total number of tries, including the first\n  # base_delay: seconds to sleep before the first retry; doubles each retry\n  # max_delay:  upper bound on any single sleep\n  # jitter:     randomize each sleep between 0 and the computed delay,\n  #             so concurrent callers don't retry in lockstep\n  # on:         exception classes that trigger a retry; anything else propagates\n  #\n  # The block receives the attempt number (1-based). After the final attempt\n  # fails, the last exception is re-raised.\n  def self.with_backoff(attempts: 3, base_delay: 0.5, max_delay: 30, jitter: true, on: [StandardError])\n    raise ArgumentError, \"attempts must be at least 1\" if attempts < 1\n\n    attempt = 1\n    begin\n      yield attempt\n    rescue *on\n      raise if attempt >= attempts\n\n      delay = [base_delay * (2**(attempt - 1)), max_delay].min\n      delay = rand * delay if jitter\n      sleep(delay)\n      attempt += 1\n      retry\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "I wrote `retry.rb` with a single `Retry.with_backoff` method; I haven't run it.\n\n```ruby\nrequire_relative \"retry\"\n\nRetry.with_backoff(attempts: 5, on: [Net::ReadTimeout, Errno::ECONNRESET]) do |attempt|\n  fetch_something\nend\n```\n\n- **Attempts:** `attempts: 3` by default, counting the first try. After the last failure, the original exception is re-raised.\n- **Delay:** starts at `base_delay: 0.5` seconds and doubles on each retry, capped at `max_delay: 30`.\n- **Jitter:** on by default, so each sleep is a random value between 0 and the computed delay. Pass `jitter: false` for exact, predictable delays.\n- **Which errors retry:** `on:` defaults to `StandardError`. Narrow it to transient errors in real use, or bugs like `NoMethodError` will be retried too.",
+  "tools": 1,
+  "seconds": 9.1,
+  "error": null
+}

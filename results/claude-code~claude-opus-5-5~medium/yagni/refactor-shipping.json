@@ -1,0 +1,12 @@
+{
+  "model": "claude-code/claude-opus-5-5:medium",
+  "variant": "yagni",
+  "prompt": "refactor-shipping",
+  "fingerprint": "2561b79900cf79d25951018c5229a6849026c708627f09810ccac6aee324b8c0",
+  "code": "SHIPPING_RATES = {\n  domestic: {\n    heavy: { express: 50, standard: 20 },\n    light: { express: 25, standard: 5 }\n  },\n  international: {\n    heavy: { express: 100, standard: 40 },\n    light: { express: 60, standard: 15 }\n  }\n}.freeze\n\ndef shipping_cost(order)\n  region = order[:country] == \"US\" ? :domestic : :international\n  size = order[:weight] > 10 ? :heavy : :light\n  speed = order[:express] ? :express : :standard\n\n  SHIPPING_RATES.dig(region, size, speed)\nend\n",
+  "from_reply": false,
+  "reply": "I refactored `shipping_cost` in `shipping.rb` so the nested `if`s are replaced by a `SHIPPING_RATES` table. The method now works out three things and looks up the price:\n\n- **Region:** domestic if the country is `\"US\"`, otherwise international.\n- **Size:** heavy if the weight is over 10, otherwise light.\n- **Speed:** express if `order[:express]` is truthy, otherwise standard.\n\nThe behavior should be the same: every price and condition carries over unchanged. I haven't run it or any tests.",
+  "tools": 2,
+  "seconds": 14.1,
+  "error": null
+}

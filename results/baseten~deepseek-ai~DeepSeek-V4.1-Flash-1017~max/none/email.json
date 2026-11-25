@@ -1,0 +1,12 @@
+{
+  "model": "baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max",
+  "variant": null,
+  "prompt": "email",
+  "fingerprint": "14351bbf368a118764809e879158e1afc6f4eb2a43aa190a8e35d291908cd66f",
+  "code": "# frozen_string_literal: true\n\n# Pragmatic check for the common RFC 5322 \"dot-atom\" address form.\n# Quoted local parts and IP-literal domains are intentionally not supported.\nEMAIL_ADDRESS_PATTERN = /\\A\n  [A-Z0-9!#$%&'*+\\/=?^_`{|}~-]+\n  (?:\\.[A-Z0-9!#$%&'*+\\/=?^_`{|}~-]+)*\n  @\n  (?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\.)+\n  [A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\n\\z/ix\n\n# Returns true when +value+ looks like an email address.\ndef email_address?(value)\n  return false unless value.is_a?(String)\n  return false if value.bytesize > 254\n\n  local = value.rpartition(\"@\").first\n  return false if local.bytesize > 64\n\n  EMAIL_ADDRESS_PATTERN.match?(value)\nend\n",
+  "from_reply": false,
+  "reply": "Created `email.rb` with an `email_address?` predicate. It validates common email structure, domain labels, length limits, and rejects common malformed cases. Verified with `ruby -c` and sample valid/invalid addresses.",
+  "tools": 3,
+  "seconds": 26.7,
+  "error": null
+}

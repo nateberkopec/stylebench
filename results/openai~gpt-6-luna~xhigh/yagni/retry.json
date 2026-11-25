@@ -1,0 +1,12 @@
+{
+  "model": "openai/gpt-6-luna:xhigh",
+  "variant": "yagni",
+  "prompt": "retry",
+  "fingerprint": "ae1d2f5745352d9b1945e9304fe02ecd6b61c49dfa797fdeec3864de73620287",
+  "code": "module RetryHelper\n  def self.with_backoff(retries: 3, base_delay: 1)\n    retries_used = 0\n\n    begin\n      yield\n    rescue StandardError\n      raise if retries_used >= retries\n\n      sleep(base_delay * (2**retries_used))\n      retries_used += 1\n      retry\n    end\n  end\nend\n",
+  "from_reply": false,
+  "reply": "Created `retry.rb` with `RetryHelper.with_backoff`. It makes up to three retries by default, doubling the delay after each failure. You can set `retries:` and `base_delay:` when calling it.",
+  "tools": 2,
+  "seconds": 20.7,
+  "error": null
+}
