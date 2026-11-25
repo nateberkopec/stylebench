@@ -9,7 +9,9 @@ require "yaml"
 
 ROOT = __dir__
 CONFIG = YAML.load_file(File.join(ROOT, "stylebench.yml"))
-RESULTS = File.join(ROOT, "results")
+OUT = File.join(ROOT, "out")
+RESULTS = File.join(OUT, "results")
+SITE = File.join(OUT, "site")
 RUN_TIMEOUT = 900
 
 Prompt = Data.define(:id, :name, :file, :body, :starter) do
@@ -180,9 +182,19 @@ def changed_lines(before, after)
   (0...b.size).to_a - kept
 end
 
+def offences(results)
+  Dir.mktmpdir("stylebench-lint-") do |dir|
+    results.each_with_index { |r, i| File.write(File.join(dir, "#{i}.rb"), r["code"]) }
+    out, = Open3.capture2("standardrb", "--format", "json", dir, err: File::NULL)
+    counts = JSON.parse(out).fetch("files").to_h { |f| [File.basename(f["path"], ".rb").to_i, f["offenses"].size] }
+    results.each_with_index { |r, i| r["offences"] = counts.fetch(i, 0) }
+  end
+end
+
 def build
   prompts = Prompt.all
   results = Dir[File.join(RESULTS, "**", "*.json")].map { |f| JSON.parse(File.read(f)) }
+  offences(results)
   order = CONFIG.fetch("models")
   columns = results.map { |r| [r["model"], r["variant"]] }.uniq.sort_by do |model, variant|
     [order.index(model) || order.size, model, variant.to_s]
@@ -200,6 +212,7 @@ def build
         starter = p.starter[p.file]
         [key, {
           code: r["code"], reply: r["reply"], tools: r["tools"], loc: loc(r["code"]), error: r["error"],
+          seconds: r["seconds"], offences: r["offences"],
           fromReply: r["from_reply"], changed: starter ? changed_lines(starter, r["code"]) : [],
           stale: r["fingerprint"] != fingerprint(r["model"], r["variant"], p),
         }]
@@ -209,8 +222,9 @@ def build
   }
   html = File.read(File.join(ROOT, "lib", "template.html"))
     .sub("/*DATA*/null") { JSON.generate(data).gsub("</") { "<\\/" } }
-  File.write(File.join(ROOT, "index.html"), html)
-  File.join(ROOT, "index.html")
+  FileUtils.mkdir_p(SITE)
+  File.write(File.join(SITE, "index.html"), html)
+  File.join(SITE, "index.html")
 end
 
 command = ARGV.shift
@@ -233,11 +247,26 @@ when "build"
   puts "Built #{build}"
 when "open"
   system("open", build)
+when "publish"
+  build
+  remote, = Open3.capture2("git", "remote", "get-url", "origin", chdir: ROOT)
+  Dir.mktmpdir("stylebench-pages-") do |dir|
+    FileUtils.cp_r(File.join(SITE, "."), dir)
+    FileUtils.touch(File.join(dir, ".nojekyll"))
+    [
+      %w[git init -q -b gh-pages],
+      %w[git add -A],
+      ["git", "commit", "-q", "-m", "Publish #{Time.now.strftime("%F %R")}"],
+      ["git", "push", "-q", "--force", remote.strip, "gh-pages"],
+    ].each { |cmd| system(*cmd, chdir: dir, exception: true) }
+  end
+  puts "Published"
 else
   abort <<~USAGE
     Usage:
       stylebench run [MODEL...] [--variant NAME|none]... [--force] [--only PROMPT] [-j N] [--per-provider N]
       stylebench build
       stylebench open
+      stylebench publish
   USAGE
 end

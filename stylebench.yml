@@ -1,6 +1,6 @@
 models:
   - openai/gpt-6.2-sol:medium
-  - openai/gpt-6.2-astra:low
+  - openai/gpt-6.2-astra:medium
   - openai/gpt-6-luna:xhigh
   - openai/gpt-6.1-terra:medium
   - baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max
