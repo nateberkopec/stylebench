@@ -1,2 +1,5 @@
 /out/
 /tmp/
+/vendor/
+/.bundle/
+/stylebench.local.yml

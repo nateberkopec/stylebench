@@ -10,7 +10,11 @@ require "yaml"
 $stdout.sync = true
 
 ROOT = __dir__
+LOCAL_CONFIG = File.join(ROOT, "stylebench.local.yml")
 CONFIG = YAML.load_file(File.join(ROOT, "stylebench.yml"))
+  .merge(File.exist?(LOCAL_CONFIG) ? YAML.load_file(LOCAL_CONFIG) : {})
+BUNDLE = { "BUNDLE_GEMFILE" => File.join(ROOT, "Gemfile") }
+THINKING = /:(off|minimal|low|medium|high|xhigh|max)\z/
 OUT = File.join(ROOT, "out")
 RESULTS = File.join(OUT, "results")
 SITE = File.join(OUT, "site")
@@ -47,9 +51,29 @@ def fingerprint(model, variant, prompt)
   Digest::SHA256.hexdigest(JSON.dump([model, variant_text(variant), prompt.message, prompt.starter]))
 end
 
+def pi_base
+  CONFIG.fetch("pi", ["pi"]) + %w[-ne --no-mcp] + CONFIG.fetch("extensions", []).flat_map { |ext| ["-e", File.expand_path(ext)] }
+end
+
+def check_models(models)
+  out, err, status = Open3.capture3(*pi_base, "--list-models")
+  abort "Pi failed to list models:\n#{err}" unless status.success?
+  available = out.lines.drop(1).filter_map { |l| l.split.first(2).join("/") if l.split.size >= 2 }
+  missing = models.reject { |m| available.include?(m.sub(THINKING, "")) }
+  return if missing.empty?
+  abort <<~MESSAGE
+    Pi has no access to these models:
+      #{missing.join("\n  ")}
+
+    See what you can use with `pi --list-models`, then either pass models on the
+    command line or list them under `models:` in stylebench.local.yml.
+  MESSAGE
+rescue Errno::ENOENT
+  abort "Could not run `#{CONFIG.fetch("pi", ["pi"]).first}`. Install Pi (https://pi.dev) or set `pi:` in stylebench.local.yml."
+end
+
 def pi_command(model, variant, prompt)
-  cmd = CONFIG.fetch("pi", ["pi"]) + %w[-p --mode json -nc -ne -ns --no-session --no-mcp --tools read,write,edit,bash --model] + [model]
-  CONFIG.fetch("extensions", []).each { |ext| cmd += ["-e", File.expand_path(ext)] }
+  cmd = pi_base + %w[-p --mode json -nc -ns --no-session --tools read,write,edit,bash --model] + [model]
   cmd += ["--append-system-prompt", File.join(ROOT, "variants", "#{variant}.md")] if variant
   cmd + [prompt.message]
 end
@@ -117,6 +141,7 @@ def run(models, variants, force, only, jobs, per_provider)
   work.reject! { |m, v, p| cached?(m, v, p) } unless force
   total = work.size
   puts "#{total} runs to do, #{all - total} cached"
+  check_models(work.map(&:first).uniq) if work.any?
   lock = Mutex.new
   slots = Hash.new(0)
   freed = ConditionVariable.new
@@ -184,13 +209,32 @@ def changed_lines(before, after)
   (0...b.size).to_a - kept
 end
 
+def install_gems
+  return if system(BUNDLE, "bundle", "check", out: File::NULL, err: File::NULL)
+  puts "Installing gems"
+  system(BUNDLE, "bundle", "install", exception: true)
+rescue Errno::ENOENT
+  abort "Bundler is missing. Run `gem install bundler` and try again."
+end
+
 def offences(results)
+  install_gems
   Dir.mktmpdir("stylebench-lint-") do |dir|
     results.each_with_index { |r, i| File.write(File.join(dir, "#{i}.rb"), r["code"]) }
-    out, = Open3.capture2("standardrb", "--format", "json", dir, err: File::NULL)
+    out, err, = Open3.capture3(BUNDLE, "bundle", "exec", "standardrb", "--format", "json", dir)
+    abort "Standard failed:\n#{err}" if out.empty?
     counts = JSON.parse(out).fetch("files").to_h { |f| [File.basename(f["path"], ".rb").to_i, f["offenses"].size] }
     results.each_with_index { |r, i| r["offences"] = counts.fetch(i, 0) }
   end
+end
+
+def origin
+  url, status = Open3.capture2("git", "remote", "get-url", "origin", chdir: ROOT, err: File::NULL)
+  url.strip if status.success?
+end
+
+def repo_url
+  origin&.sub(/\Agit@([^:]+):/, "https://\\1/")&.delete_suffix(".git")&.then { |url| url if url.start_with?("https://") }
 end
 
 def build
@@ -205,6 +249,7 @@ def build
   end
   by_key = results.group_by { |r| "#{r["model"]}|#{r["variant"]}" }
   data = {
+    repo: repo_url,
     columns:,
     variants: Dir[File.join(ROOT, "variants", "*.md")].to_h { |f| [File.basename(f, ".md"), File.read(f)] },
     prompts: prompts.map do |p|
@@ -248,10 +293,12 @@ when "run"
 when "build"
   puts "Built #{build}"
 when "open"
-  system("open", build)
+  page = build
+  opener = RbConfig::CONFIG["host_os"].match?(/darwin/) ? "open" : "xdg-open"
+  puts "Built #{page}" unless system(opener, page, err: File::NULL)
 when "publish"
+  remote = origin or abort "No `origin` remote to publish to."
   build
-  remote, = Open3.capture2("git", "remote", "get-url", "origin", chdir: ROOT)
   Dir.mktmpdir("stylebench-pages-") do |dir|
     FileUtils.cp_r(File.join(SITE, "."), dir)
     FileUtils.touch(File.join(dir, ".nojekyll"))
@@ -259,7 +306,7 @@ when "publish"
       %w[git init -q -b gh-pages],
       %w[git add -A],
       ["git", "commit", "-q", "-m", "Publish #{Time.now.strftime("%F %R")}"],
-      ["git", "push", "-q", "--force", remote.strip, "gh-pages"],
+      ["git", "push", "-q", "--force", remote, "gh-pages"],
     ].each { |cmd| system(*cmd, chdir: dir, exception: true) }
   end
   puts "Published"
