@@ -187,7 +187,7 @@ def build
   columns = results.map { |r| [r["model"], r["variant"]] }.uniq.sort_by do |model, variant|
     [order.index(model) || order.size, model, variant.to_s]
   end.map do |model, variant|
-    { id: "#{model}|#{variant}", model: model.split("/", 2).last, variant: }
+    { id: "#{model}|#{variant}", key: model, model: model.split("/", 2).last, variant: }
   end
   by_key = results.group_by { |r| "#{r["model"]}|#{r["variant"]}" }
   data = {

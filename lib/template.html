@@ -32,7 +32,7 @@ a { color: inherit; }
 
 .bar {
   position: sticky; top: 0; z-index: 20;
-  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px 20px;
   padding: 12px 20px;
   background: var(--ink); color: #fff;
 }
@@ -41,6 +41,8 @@ a { color: inherit; }
 .bar .spacer { flex: 1; }
 .bar label { font-size: 14px; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 
+.filters { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; align-items: baseline; flex: 1 1 600px; }
+.filters .label { font-size: 13px; color: #A9B6C0; white-space: nowrap; }
 .cols { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .chip, .all {
   border: 1px solid #4A5966; background: none; border-radius: 999px;
@@ -132,8 +134,11 @@ pre.code { margin: 0; padding: 10px 0; font: 12.5px/1.55 "IBM Plex Mono", ui-mon
 <body>
 <header class="bar">
   <h1><a href="#">Stylebench</a></h1>
-  <div class="cols" id="cols" aria-label="Columns"></div>
-  <span class="spacer"></span>
+  <div class="filters">
+    <span class="label">Models</span><div class="cols" id="f-models" aria-label="Models"></div>
+    <span class="label">Variants</span><div class="cols" id="f-variants" aria-label="Variants"></div>
+    <span class="label">Prompts</span><div class="cols" id="f-prompts" aria-label="Prompts"></div>
+  </div>
   <label><input type="checkbox" id="blind"> Hide model names</label>
 </header>
 <main id="main"></main>
@@ -156,9 +161,20 @@ function highlight(line) {
   return out + esc(line.slice(last));
 }
 
-const state = { hidden: new Set(JSON.parse(localStorage.getItem("sb-hidden") || "[]")), blind: false };
-const save = () => localStorage.setItem("sb-hidden", JSON.stringify([...state.hidden]));
-const visibleCols = () => columns.filter(c => !state.hidden.has(c.id));
+const NO_VARIANT = "";
+const groups = {
+  models: [...new Set(columns.map(c => c.key))].map(k => ({ id: k, label: columns.find(c => c.key === k).model })),
+  variants: [...new Set(columns.map(c => c.variant ?? NO_VARIANT))].map(v => ({ id: v, label: v || "No variant" })),
+  prompts: prompts.map(p => ({ id: p.id, label: p.name })),
+};
+const stored = JSON.parse(localStorage.getItem("sb-hidden-v2") || "{}");
+const state = {
+  hidden: Object.fromEntries(Object.keys(groups).map(g => [g, new Set(stored[g] || [])])),
+  blind: false,
+};
+const save = () => localStorage.setItem("sb-hidden-v2", JSON.stringify(Object.fromEntries(Object.entries(state.hidden).map(([g, s]) => [g, [...s]]))));
+const visibleCols = () => columns.filter(c => !state.hidden.models.has(c.key) && !state.hidden.variants.has(c.variant ?? NO_VARIANT));
+const visiblePrompts = () => prompts.filter(p => !state.hidden.prompts.has(p.id));
 const variantLink = v => v ? `<a class="variant" href="#variant/${encodeURIComponent(v)}">${esc(v)}</a>` : "";
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
@@ -188,8 +204,9 @@ function promptCell(p) {
 
 function renderSheet() {
   const cols = visibleCols();
-  if (!cols.length) return `<div class="page"><p>No columns shown. Pick some in the top bar.</p></div>`;
-  const rows = prompts.map(p => promptCell(p) + cols.map(c => frame(p, c)).join("")).join("");
+  const shown = visiblePrompts();
+  if (!cols.length || !shown.length) return `<div class="page"><p>Nothing to show. Pick at least one model, variant, and prompt in the top bar.</p></div>`;
+  const rows = shown.map(p => promptCell(p) + cols.map(c => frame(p, c)).join("")).join("");
   return `<div class="sheet" style="--n:${cols.length}">${rows}</div>`;
 }
 
@@ -207,19 +224,32 @@ function render() {
   document.body.classList.toggle("blind", state.blind);
   const m = location.hash.match(/^#variant\/(.+)$/);
   document.getElementById("main").innerHTML = m ? renderVariant(decodeURIComponent(m[1])) : renderSheet();
-  document.getElementById("cols").innerHTML =
-    `<button class="all" data-all="1">All</button><button class="all" data-all="0">None</button>` +
-    columns.map((c, i) => {
-      const label = state.blind ? `Column ${i + 1}` : c.model.replace("claude-", "") + (c.variant ? " / " + c.variant : "");
-      return `<button class="chip" data-col="${esc(c.id)}" aria-pressed="${!state.hidden.has(c.id)}">${esc(label)}</button>`;
-    }).join("");
+  for (const [group, items] of Object.entries(groups)) {
+    document.getElementById("f-" + group).innerHTML =
+      `<button class="all" data-group="${group}" data-all="1">All</button><button class="all" data-group="${group}" data-all="0">None</button>` +
+      items.map((item, i) => {
+        const label = state.blind && group === "models" ? `Model ${i + 1}` : item.label.replace("claude-", "");
+        return `<button class="chip" data-group="${group}" data-id="${esc(item.id)}" aria-pressed="${!state.hidden[group].has(item.id)}">${esc(label)}</button>`;
+      }).join("");
+  }
 }
 
 document.addEventListener("click", e => {
   const all = e.target.closest(".all");
-  if (all) { state.hidden = all.dataset.all === "1" ? new Set() : new Set(columns.map(c => c.id)); save(); return render(); }
+  if (all) {
+    const g = all.dataset.group;
+    state.hidden[g] = all.dataset.all === "1" ? new Set() : new Set(groups[g].map(i => i.id));
+    save();
+    return render();
+  }
   const chip = e.target.closest(".chip");
-  if (chip) { const id = chip.dataset.col; state.hidden.has(id) ? state.hidden.delete(id) : state.hidden.add(id); save(); render(); }
+  if (chip) {
+    const hidden = state.hidden[chip.dataset.group];
+    const id = chip.dataset.id;
+    hidden.has(id) ? hidden.delete(id) : hidden.add(id);
+    save();
+    render();
+  }
 });
 document.getElementById("blind").onchange = e => { state.blind = e.target.checked; render(); };
 window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
