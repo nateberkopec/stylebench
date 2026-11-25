@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stylebench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --table: #E4E9ED;
+  --frame: #FFFFFF;
+  --ink: #1E2A33;
+  --muted: #687884;
+  --rule: #C5CED5;
+  --str: #2E6A50;
+  --const: #2A5986;
+  --rail: 248px;
+  --col: minmax(330px, 1fr);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--table);
+  color: var(--ink);
+  font: 15px/1.45 "Schibsted Grotesk", system-ui, sans-serif;
+}
+button, input { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--const); outline-offset: 2px; }
+
+.bar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  padding: 12px 20px;
+  background: var(--ink); color: #fff;
+}
+.bar h1 { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.bar h1 a { text-decoration: none; }
+.bar .spacer { flex: 1; }
+.bar label { font-size: 14px; display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+.cols { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.chip, .all {
+  border: 1px solid #4A5966; background: none; border-radius: 999px;
+  padding: 2px 10px; font-size: 13px; cursor: pointer;
+}
+.all { border-radius: 6px; color: #C9D3DA; }
+.chip[aria-pressed="true"] { background: #33424E; border-color: #7D8E9B; }
+.chip[aria-pressed="false"] { opacity: .5; text-decoration: line-through; }
+
+.sheet {
+  display: grid;
+  grid-template-columns: var(--rail) repeat(var(--n), var(--col));
+  gap: 14px;
+  padding: 18px 20px 60px;
+}
+.who {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--rule);
+  background: #F3F6F8;
+}
+.model { font-weight: 700; font-size: 14px; }
+.variant {
+  font-size: 13px; padding: 0 7px; border-radius: 4px;
+  background: var(--frame); border: 1px solid var(--rule);
+  text-decoration: none;
+}
+.variant:hover { border-color: var(--const); color: var(--const); }
+
+.prompt { align-self: start; padding: 10px 14px 10px 0; font-size: 14px; }
+.prompt .name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.prompt p { margin: 0 0 6px; color: #3B4954; }
+.prompt pre { font: 12px/1.45 "IBM Plex Mono", monospace; background: #D6DDE2; padding: 6px 8px; border-radius: 4px; margin: 6px 0 0; white-space: pre-wrap; }
+
+.frame {
+  background: var(--frame);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  display: flex; flex-direction: column;
+  min-width: 0;
+  align-self: start;
+}
+.prose {
+  border-bottom: 1px dashed var(--rule);
+  font-size: 13px; color: var(--muted);
+  padding: 6px 12px;
+}
+.prose summary { cursor: pointer; }
+.prose[open] { color: var(--ink); }
+.prose p { margin: 6px 0 2px; }
+
+pre.code { margin: 0; padding: 10px 0; font: 12.5px/1.55 "IBM Plex Mono", ui-monospace, monospace; }
+.ln { display: block; padding: 0 12px 0 calc(12px + 4ch); text-indent: -4ch; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 1.55em; }
+.c { color: var(--muted); font-style: italic; }
+.k { font-weight: 600; }
+.s { color: var(--str); }
+.y, .t, .n { color: var(--const); }
+
+.loc {
+  border-top: 1px solid var(--rule);
+  padding: 6px 12px; font-size: 12.5px; color: var(--muted);
+}
+.loc b { color: var(--ink); font-weight: 600; }
+
+.blind .model, .blind .variant { filter: blur(6px); user-select: none; pointer-events: none; }
+
+.page { max-width: 72ch; padding: 28px 20px 60px; }
+.page .back { font-size: 14px; color: var(--muted); }
+.page h2 { font: 600 24px/1.2 "IBM Plex Mono", monospace; margin: 14px 0 6px; }
+.page .used { color: var(--muted); margin: 0 0 18px; }
+.page pre {
+  background: var(--frame); border: 1px solid var(--rule); border-radius: 3px;
+  padding: 16px 18px; font: 13.5px/1.6 "IBM Plex Mono", monospace; white-space: pre-wrap; margin: 0;
+}
+
+@media (max-width: 720px) {
+  :root { --rail: 180px; --col: minmax(280px, 86vw); }
+  .sheet { width: max-content; }
+}
+
+.ln.changed { background: #FFF3C4; box-shadow: inset 3px 0 #D9A400; }
+.note { padding: 6px 12px; font-size: 12.5px; color: #8A5A00; background: #FFF8E1; border-bottom: 1px solid var(--rule); }
+.note.err { color: #9B1C1C; background: #FDECEC; }
+.empty { padding: 14px 12px; color: var(--muted); font-size: 13px; }
+.prompt .given { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.prose .md { white-space: pre-wrap; font-size: 13px; margin: 6px 0 2px; }
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1><a href="#">Stylebench</a></h1>
+  <div class="cols" id="cols" aria-label="Columns"></div>
+  <span class="spacer"></span>
+  <label><input type="checkbox" id="blind"> Hide model names</label>
+</header>
+<main id="main"></main>
+<script>
+const data = /*DATA*/null;
+const { columns, variants, prompts } = data;
+
+const KW = "def|end|class|module|if|elsif|else|unless|while|until|return|yield|do|begin|rescue|ensure|raise|then|case|when|self|nil|true|false|attr_reader|attr_accessor|attr_writer|private|require|require_relative|include|extend|freeze|retry|in|and|or|not|super|loop|next|break";
+const TOKEN = new RegExp(`(#.*$)|("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*'|\\/(?:[^/\\\\\\n ]|\\\\.)+\\/)|(:[a-z_]\\w*[?!]?|\\b[a-z_]\\w*:(?!:))|\\b(${KW})\\b|(\\b[A-Z]\\w*)|(\\b\\d[\\d_.]*)`, "g");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function highlight(line) {
+  let out = "", last = 0;
+  line.replace(TOKEN, (m, c, s, y, k, t, n, i) => {
+    out += esc(line.slice(last, i));
+    const cls = c ? "c" : s ? "s" : y ? "y" : k ? "k" : t ? "t" : "n";
+    out += `<span class="${cls}">${esc(m)}</span>`;
+    last = i + m.length;
+  });
+  return out + esc(line.slice(last));
+}
+
+const state = { hidden: new Set(JSON.parse(localStorage.getItem("sb-hidden") || "[]")), blind: false };
+const save = () => localStorage.setItem("sb-hidden", JSON.stringify([...state.hidden]));
+const visibleCols = () => columns.filter(c => !state.hidden.has(c.id));
+const variantLink = v => v ? `<a class="variant" href="#variant/${encodeURIComponent(v)}">${esc(v)}</a>` : "";
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+
+function frame(p, col) {
+  const who = `<div class="who"><span class="model">${esc(col.model)}</span>${variantLink(col.variant)}</div>`;
+  const o = p.out[col.id];
+  if (!o) return `<article class="frame">${who}<div class="empty">Not run yet</div></article>`;
+  const changed = new Set(o.changed);
+  const code = o.code.replace(/\n$/, "");
+  const lines = code.split("\n").map((l, i) => `<span class="ln${changed.has(i) ? " changed" : ""}">${highlight(l)}</span>`).join("");
+  const replyLines = o.reply ? o.reply.split("\n").filter(l => l.trim()).length : 0;
+  const prose = replyLines
+    ? `<details class="prose"><summary>Plus ${plural(replyLines, "line")} of prose</summary><div class="md">${esc(o.reply)}</div></details>`
+    : "";
+  const notes = [
+    o.error && `<div class="note err">${esc(o.error)}</div>`,
+    o.fromReply && !o.error && `<div class="note">Didn't write the file; code taken from its reply</div>`,
+    o.stale && `<div class="note">Prompt or variant changed since this ran</div>`,
+  ].filter(Boolean).join("");
+  return `<article class="frame">${who}${notes}${prose}${code ? `<pre class="code">${lines}</pre>` : ""}<div class="loc"><b>${o.loc}</b> LOC, <b>${o.tools}</b> ${o.tools === 1 ? "tool call" : "tool calls"}</div></article>`;
+}
+
+function promptCell(p) {
+  const given = Object.keys(p.given);
+  return `<div class="prompt"><div class="name">${esc(p.name)}</div><p>${esc(p.text)}</p>${given.length ? `<div class="given">Starts with ${given.map(esc).join(", ")}</div>` : ""}</div>`;
+}
+
+function renderSheet() {
+  const cols = visibleCols();
+  if (!cols.length) return `<div class="page"><p>No columns shown. Pick some in the top bar.</p></div>`;
+  const rows = prompts.map(p => promptCell(p) + cols.map(c => frame(p, c)).join("")).join("");
+  return `<div class="sheet" style="--n:${cols.length}">${rows}</div>`;
+}
+
+function renderVariant(name) {
+  const used = [...new Set(columns.filter(c => c.variant === name).map(c => c.model))];
+  return `<div class="page">
+    <a class="back" href="#">Back to results</a>
+    <h2>${esc(name)}</h2>
+    <p class="used">${used.length ? `Appended to the system prompt for ${used.map(esc).join(", ")}.` : "Not used in any run yet."}</p>
+    <pre>${esc(variants[name] ?? "This variant file no longer exists.")}</pre>
+  </div>`;
+}
+
+function render() {
+  document.body.classList.toggle("blind", state.blind);
+  const m = location.hash.match(/^#variant\/(.+)$/);
+  document.getElementById("main").innerHTML = m ? renderVariant(decodeURIComponent(m[1])) : renderSheet();
+  document.getElementById("cols").innerHTML =
+    `<button class="all" data-all="1">All</button><button class="all" data-all="0">None</button>` +
+    columns.map((c, i) => {
+      const label = state.blind ? `Column ${i + 1}` : c.model.replace("claude-", "") + (c.variant ? " / " + c.variant : "");
+      return `<button class="chip" data-col="${esc(c.id)}" aria-pressed="${!state.hidden.has(c.id)}">${esc(label)}</button>`;
+    }).join("");
+}
+
+document.addEventListener("click", e => {
+  const all = e.target.closest(".all");
+  if (all) { state.hidden = all.dataset.all === "1" ? new Set() : new Set(columns.map(c => c.id)); save(); return render(); }
+  const chip = e.target.closest(".chip");
+  if (chip) { const id = chip.dataset.col; state.hidden.has(id) ? state.hidden.delete(id) : state.hidden.add(id); save(); render(); }
+});
+document.getElementById("blind").onchange = e => { state.blind = e.target.checked; render(); };
+window.addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
+render();
+</script>
+</body>
+</html>

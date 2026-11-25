@@ -1,0 +1,213 @@
+#!/usr/bin/env ruby
+require "digest"
+require "fileutils"
+require "json"
+require "open3"
+require "optparse"
+require "tmpdir"
+require "yaml"
+
+ROOT = __dir__
+CONFIG = YAML.load_file(File.join(ROOT, "stylebench.yml"))
+RESULTS = File.join(ROOT, "results")
+RUN_TIMEOUT = 900
+
+Prompt = Data.define(:id, :name, :file, :body, :starter) do
+  def self.all
+    Dir[File.join(ROOT, "prompts", "*", "prompt.md")].sort.map { |path| load(File.dirname(path)) }
+  end
+
+  def self.load(dir)
+    _, front, body = File.read(File.join(dir, "prompt.md")).split(/^---\s*$/, 3)
+    meta = YAML.safe_load(front)
+    starter = Dir[File.join(dir, "starter", "**", "*")].select { |f| File.file?(f) }.sort.to_h do |f|
+      [f.delete_prefix(File.join(dir, "starter") + "/"), File.read(f)]
+    end
+    new(File.basename(dir), meta.fetch("name"), meta.fetch("file"), body.strip, starter)
+  end
+
+  def message
+    starter.key?(file) ? body : "#{body}\n\nPut it in `#{file}`."
+  end
+end
+
+def variant_text(variant)
+  variant && File.read(File.join(ROOT, "variants", "#{variant}.md"))
+end
+
+def result_path(model, variant, prompt)
+  File.join(RESULTS, model.gsub(/[\/:]/, "~"), variant || "none", "#{prompt.id}.json")
+end
+
+def fingerprint(model, variant, prompt)
+  Digest::SHA256.hexdigest(JSON.dump([model, variant_text(variant), prompt.message, prompt.starter]))
+end
+
+def pi_command(model, variant, prompt)
+  cmd = %w[pi -p --mode json -nc -ne -ns --no-session --no-mcp --tools read,write,edit,bash --model] + [model]
+  CONFIG.fetch("extensions", []).each { |ext| cmd += ["-e", File.expand_path(ext)] }
+  cmd += ["--append-system-prompt", File.join(ROOT, "variants", "#{variant}.md")] if variant
+  cmd + [prompt.message]
+end
+
+def run_pi(cmd, dir)
+  Open3.popen3(*cmd, chdir: dir, pgroup: true) do |stdin, stdout, stderr, wait|
+    stdin.close
+    out = Thread.new { stdout.read }
+    err = Thread.new { stderr.read }
+    unless wait.join(RUN_TIMEOUT)
+      Process.kill("-TERM", wait.pid)
+      return [out.value, "timed out after #{RUN_TIMEOUT}s"]
+    end
+    [out.value, wait.value.success? ? nil : err.value.strip]
+  end
+end
+
+def parse_events(stdout)
+  events = stdout.lines.filter_map { |l| JSON.parse(l) rescue nil }
+  replies = events.select { |e| e["type"] == "message_end" && e.dig("message", "role") == "assistant" }
+  last = replies.last&.fetch("message")
+  text = last ? last["content"].select { |c| c["type"] == "text" }.map { |c| c["text"] }.join("\n").strip : ""
+  error = last && last["stopReason"] == "error" ? last["errorMessage"] : nil
+  [text, events.count { |e| e["type"] == "tool_execution_start" }, error]
+end
+
+def run_one(model, variant, prompt)
+  Dir.mktmpdir("stylebench-") do |dir|
+    prompt.starter.each do |name, content|
+      FileUtils.mkdir_p(File.dirname(File.join(dir, name)))
+      File.write(File.join(dir, name), content)
+    end
+    started = Time.now
+    stdout, failure = run_pi(pi_command(model, variant, prompt), dir)
+    reply, tools, error = parse_events(stdout)
+    target = File.join(dir, prompt.file)
+    from_reply = !File.exist?(target)
+    code = from_reply ? reply[/```\w*\n(.*?)```/m, 1].to_s : File.read(target)
+    {
+      model:, variant:, prompt: prompt.id, fingerprint: fingerprint(model, variant, prompt),
+      code:, from_reply:, reply:, tools:, seconds: (Time.now - started).round(1),
+      error: error || failure&.then { |f| f.empty? ? "pi exited with an error" : f.lines.last(5).join },
+    }
+  end
+end
+
+def run(models, variant, force, only, jobs)
+  prompts = Prompt.all
+  prompts.select! { |p| only.include?(p.id) } if only.any?
+  work = models.product(prompts).reject do |model, prompt|
+    path = result_path(model, variant, prompt)
+    !force && File.exist?(path) && JSON.parse(File.read(path))["fingerprint"] == fingerprint(model, variant, prompt) &&
+      !JSON.parse(File.read(path))["error"]
+  end
+  puts "#{work.size} runs to do, #{models.size * prompts.size - work.size} cached"
+  queue = Queue.new
+  work.each { |w| queue << w }
+  queue.close
+  lock = Mutex.new
+  done = 0
+  Array.new(jobs) do
+    Thread.new do
+      while (model, prompt = queue.pop)
+        result = run_one(model, variant, prompt)
+        path = result_path(model, variant, prompt)
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, JSON.pretty_generate(result))
+        lock.synchronize do
+          done += 1
+          status = result[:error] ? "error: #{result[:error].lines.first&.strip}" : "#{result[:seconds]}s"
+          puts "[#{done}/#{work.size}] #{model} #{variant || "-"} #{prompt.id} #{status}"
+        end
+      end
+    end
+  end.each(&:join)
+end
+
+def loc(code)
+  code.lines.count { |l| !l.strip.empty? && !l.lstrip.start_with?("#") }
+end
+
+def changed_lines(before, after)
+  a = before.lines.map(&:rstrip)
+  b = after.lines.map(&:rstrip)
+  table = Array.new(a.size + 1) { Array.new(b.size + 1, 0) }
+  a.size.downto(1) do |i|
+    b.size.downto(1) do |j|
+      table[i - 1][j - 1] = a[i - 1] == b[j - 1] ? table[i][j] + 1 : [table[i - 1][j], table[i][j - 1]].max
+    end
+  end
+  kept = []
+  i = j = 0
+  while i < a.size && j < b.size
+    if a[i] == b[j]
+      kept << j
+      i += 1
+      j += 1
+    elsif table[i + 1][j] >= table[i][j + 1]
+      i += 1
+    else
+      j += 1
+    end
+  end
+  (0...b.size).to_a - kept
+end
+
+def build
+  prompts = Prompt.all
+  results = Dir[File.join(RESULTS, "**", "*.json")].map { |f| JSON.parse(File.read(f)) }
+  order = CONFIG.fetch("models")
+  columns = results.map { |r| [r["model"], r["variant"]] }.uniq.sort_by do |model, variant|
+    [order.index(model) || order.size, model, variant.to_s]
+  end.map do |model, variant|
+    { id: "#{model}|#{variant}", model: model.split("/", 2).last, variant: }
+  end
+  by_key = results.group_by { |r| "#{r["model"]}|#{r["variant"]}" }
+  data = {
+    columns:,
+    variants: Dir[File.join(ROOT, "variants", "*.md")].to_h { |f| [File.basename(f, ".md"), File.read(f)] },
+    prompts: prompts.map do |p|
+      out = by_key.to_h do |key, rs|
+        r = rs.find { |x| x["prompt"] == p.id }
+        next [key, nil] unless r
+        starter = p.starter[p.file]
+        [key, {
+          code: r["code"], reply: r["reply"], tools: r["tools"], loc: loc(r["code"]), error: r["error"],
+          fromReply: r["from_reply"], changed: starter ? changed_lines(starter, r["code"]) : [],
+          stale: r["fingerprint"] != fingerprint(r["model"], r["variant"], p),
+        }]
+      end
+      { id: p.id, name: p.name, text: p.body, given: p.starter, out: }
+    end,
+  }
+  html = File.read(File.join(ROOT, "lib", "template.html"))
+    .sub("/*DATA*/null", JSON.generate(data).gsub("</", "<\\/"))
+  File.write(File.join(ROOT, "index.html"), html)
+  File.join(ROOT, "index.html")
+end
+
+command = ARGV.shift
+case command
+when "run"
+  opts = { variant: nil, force: false, only: [], jobs: 8 }
+  OptionParser.new do |o|
+    o.banner = "Usage: stylebench run [MODEL...] [options]"
+    o.on("--variant NAME", "Append variants/NAME.md to the system prompt") { |v| opts[:variant] = v }
+    o.on("--force", "Rerun even if a result is cached") { opts[:force] = true }
+    o.on("--only PROMPT", "Only run this prompt (repeatable)") { |v| opts[:only] << v }
+    o.on("-j N", Integer, "Parallel runs (default 8)") { |v| opts[:jobs] = v }
+  end.parse!
+  abort "No variant at variants/#{opts[:variant]}.md" if opts[:variant] && !variant_text(opts[:variant])
+  run(ARGV.empty? ? CONFIG.fetch("models") : ARGV, opts[:variant], opts[:force], opts[:only], opts[:jobs])
+  puts "Built #{build}"
+when "build"
+  puts "Built #{build}"
+when "open"
+  system("open", build)
+else
+  abort <<~USAGE
+    Usage:
+      stylebench run [MODEL...] [--variant NAME] [--force] [--only PROMPT] [-j N]
+      stylebench build
+      stylebench open
+  USAGE
+end

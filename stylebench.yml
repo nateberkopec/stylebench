@@ -1,0 +1,10 @@
+models:
+  - openai/gpt-6.2-sol:medium
+  - openai/gpt-6.2-astra:low
+  - openai/gpt-6-luna:xhigh
+  - openai/gpt-6.1-terra:medium
+  - baseten/deepseek-ai/DeepSeek-V4.1-Flash-1017:max
+  - claude-code/claude-opus-5-5:medium
+  - claude-code/claude-fable-5-2:medium
+extensions:
+  - ~/.pi/agent/git/github.com/nateberkopec/agent-stuff/extensions/claude-code.ts
