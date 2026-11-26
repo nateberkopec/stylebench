@@ -20,7 +20,7 @@ RESULTS = File.join(OUT, "results")
 SITE = File.join(OUT, "site")
 RUN_TIMEOUT = 900
 
-Prompt = Data.define(:id, :name, :file, :body, :starter) do
+Prompt = Data.define(:id, :name, :file, :body, :starter, :expect) do
   def self.all
     Dir[File.join(ROOT, "prompts", "*", "prompt.md")].sort.map { |path| load(File.dirname(path)) }
   end
@@ -31,7 +31,7 @@ Prompt = Data.define(:id, :name, :file, :body, :starter) do
     starter = Dir[File.join(dir, "starter", "**", "*")].select { |f| File.file?(f) }.sort.to_h do |f|
       [f.delete_prefix(File.join(dir, "starter") + "/"), File.read(f)]
     end
-    new(File.basename(dir), meta.fetch("name"), meta.fetch("file"), body.strip, starter)
+    new(File.basename(dir), meta.fetch("name"), meta.fetch("file"), body.strip, starter, Array(meta["expect"]))
   end
 
   def message
@@ -99,7 +99,8 @@ def parse_events(stdout)
   error = last && last["stopReason"] == "error" ? last["errorMessage"] : nil
   usage = replies.map { |e| e.dig("message", "usage") || {} }
   tokens = {
-    input: usage.sum { |u| u.values_at("input", "cacheRead", "cacheWrite").sum(&:to_i) },
+    input: usage.sum { |u| u.values_at("input", "cacheWrite").sum(&:to_i) },
+    cached: usage.sum { |u| u["cacheRead"].to_i },
     output: usage.sum { |u| u["output"].to_i },
   }
   [text, events.count { |e| e["type"] == "tool_execution_start" }, error, tokens]
@@ -264,6 +265,7 @@ def build
         starter = p.starter[p.file]
         [key, {
           code: r["code"], reply: r["reply"], tools: r["tools"], loc: loc(r["code"]), error: r["error"],
+          hits: hits(p, r["code"]), expect: p.expect.size,
           seconds: r["seconds"], tokens: r["tokens"], offences: r["offences"],
           fromReply: r["from_reply"], changed: starter ? changed_lines(starter, r["code"]) : [],
           stale: r["fingerprint"] != fingerprint(r["model"], r["variant"], p),
@@ -277,6 +279,23 @@ def build
   FileUtils.mkdir_p(SITE)
   File.write(File.join(SITE, "index.html"), html)
   File.join(SITE, "index.html")
+end
+
+def hits(prompt, code)
+  prompt.expect.count { |pattern| code.match?(Regexp.new(pattern)) }
+end
+
+def score
+  prompts = Prompt.all.to_h { |p| [p.id, p] }
+  results = Dir[File.join(RESULTS, "**", "*.json")].map { |f| JSON.parse(File.read(f)) }.reject { |r| r["error"] }
+  possible = prompts.values.sum { |p| p.expect.size }
+  puts format("%-60s %4s %7s %8s %8s %8s %8s", "model / variant", "runs", "hits", "secs", "input", "cached", "output")
+  results.group_by { |r| [r["model"], r["variant"] || "none"] }.sort.each do |(model, variant), rs|
+    mean = ->(key) { rs.sum { |r| r.dig("tokens", key).to_i } / rs.size }
+    got = rs.sum { |r| hits(prompts.fetch(r["prompt"]), r["code"]) }
+    puts format("%-60s %4d %3d/%-3d %8.1f %8d %8d %8d", "#{model} / #{variant}", rs.size, got, possible,
+      rs.sum { |r| r["seconds"] } / rs.size, mean["input"], mean["cached"], mean["output"])
+  end
 end
 
 command = ARGV.shift
@@ -297,6 +316,8 @@ when "run"
   puts "Built #{build}"
 when "build"
   puts "Built #{build}"
+when "score"
+  score
 when "open"
   page = build
   opener = RbConfig::CONFIG["host_os"].match?(/darwin/) ? "open" : "xdg-open"
@@ -320,6 +341,7 @@ else
     Usage:
       stylebench run [MODEL...] [--variant NAME|none]... [--force] [--only PROMPT] [-j N] [--per-provider N]
       stylebench build
+      stylebench score
       stylebench open
       stylebench publish
   USAGE
