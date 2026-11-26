@@ -17,7 +17,7 @@ Stylebench is for judging style, not correctness. Each prompt asks for 10 to 20 
 git clone https://github.com/nateberkopec/stylebench
 cd stylebench
 pi --list-models                       # see which models you can use
-./stylebench run openai/gpt-6.2-sol    # run all 15 prompts on one model
+./stylebench run openai/gpt-6.2-sol    # run all 11 prompts on one model
 ./stylebench open                      # build the page and open it
 ```
 
