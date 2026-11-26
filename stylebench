@@ -19,6 +19,7 @@ OUT = File.join(ROOT, "out")
 RESULTS = File.join(OUT, "results")
 SITE = File.join(OUT, "site")
 RUN_TIMEOUT = 900
+PRICES = YAML.load_file(File.join(ROOT, "prices.yml"))
 
 Prompt = Data.define(:id, :name, :file, :body, :starter) do
   def self.all
@@ -99,7 +100,8 @@ def parse_events(stdout)
   error = last && last["stopReason"] == "error" ? last["errorMessage"] : nil
   usage = replies.map { |e| e.dig("message", "usage") || {} }
   tokens = {
-    input: usage.sum { |u| u.values_at("input", "cacheRead", "cacheWrite").sum(&:to_i) },
+    input: usage.sum { |u| u.values_at("input", "cacheWrite").sum(&:to_i) },
+    cached: usage.sum { |u| u["cacheRead"].to_i },
     output: usage.sum { |u| u["output"].to_i },
   }
   [text, events.count { |e| e["type"] == "tool_execution_start" }, error, tokens]
@@ -185,6 +187,12 @@ def run(models, variants, force, only, jobs, per_provider)
   end.each(&:join)
 end
 
+def cost(model, tokens)
+  rates = PRICES[model.sub(THINKING, "")]
+  return unless rates && tokens
+  tokens.values_at("input", "cached", "output").zip(rates).sum { |count, rate| count.to_i * rate } / 1_000_000.0
+end
+
 def loc(code)
   code.lines.count { |l| !l.strip.empty? && !l.lstrip.start_with?("#") }
 end
@@ -264,7 +272,7 @@ def build
         starter = p.starter[p.file]
         [key, {
           code: r["code"], reply: r["reply"], tools: r["tools"], loc: loc(r["code"]), error: r["error"],
-          seconds: r["seconds"], tokens: r["tokens"], offences: r["offences"],
+          seconds: r["seconds"], tokens: r["tokens"], cost: cost(r["model"], r["tokens"]), offences: r["offences"],
           fromReply: r["from_reply"], changed: starter ? changed_lines(starter, r["code"]) : [],
           stale: r["fingerprint"] != fingerprint(r["model"], r["variant"], p),
         }]

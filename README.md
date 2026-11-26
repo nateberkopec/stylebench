@@ -4,7 +4,7 @@ Run small Ruby prompts through coding models and read the code side by side.
 
 See the results: https://nateberkopec.github.io/stylebench/
 
-Stylebench is for judging style, not correctness. Each prompt asks for 10 to 20 lines of Ruby, and the page shows what every model wrote, with a line count, tool call count, run time, and [Standard](https://github.com/standardrb/standard) offence count.
+Stylebench is for judging style, not correctness. Each prompt asks for 10 to 20 lines of Ruby, and the page shows what every model wrote, with a line count, tool call count, run time, token count, estimated cost, and [Standard](https://github.com/standardrb/standard) offence count.
 
 ## Requirements
 
@@ -48,6 +48,8 @@ pi: ["pi"]                       # the command used to start Pi
 extensions:                      # Pi extensions to load, such as custom providers
   - ~/path/to/extension.ts
 ```
+
+`prices.yml` maps each model to its price in USD per million tokens, as `[input, cached input, output]`. The page uses it to estimate what each run cost. Models missing from it show tokens but no cost.
 
 ## How a run works
 
