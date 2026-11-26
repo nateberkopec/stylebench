@@ -97,7 +97,12 @@ def parse_events(stdout)
   last = replies.last&.fetch("message")
   text = last ? last["content"].select { |c| c["type"] == "text" }.map { |c| c["text"] }.join("\n").strip : ""
   error = last && last["stopReason"] == "error" ? last["errorMessage"] : nil
-  [text, events.count { |e| e["type"] == "tool_execution_start" }, error]
+  usage = replies.map { |e| e.dig("message", "usage") || {} }
+  tokens = {
+    input: usage.sum { |u| u.values_at("input", "cacheRead", "cacheWrite").sum(&:to_i) },
+    output: usage.sum { |u| u["output"].to_i },
+  }
+  [text, events.count { |e| e["type"] == "tool_execution_start" }, error, tokens]
 end
 
 def run_one(model, variant, prompt)
@@ -108,13 +113,13 @@ def run_one(model, variant, prompt)
     end
     started = Time.now
     stdout, failure = run_pi(pi_command(model, variant, prompt), dir)
-    reply, tools, error = parse_events(stdout)
+    reply, tools, error, tokens = parse_events(stdout)
     target = File.join(dir, prompt.file)
     from_reply = !File.exist?(target)
     code = from_reply ? reply[/```\w*\n(.*?)```/m, 1].to_s : File.read(target)
     {
       model:, variant:, prompt: prompt.id, fingerprint: fingerprint(model, variant, prompt),
-      code:, from_reply:, reply:, tools:, seconds: (Time.now - started).round(1),
+      code:, from_reply:, reply:, tools:, tokens:, seconds: (Time.now - started).round(1),
       error: error || failure&.then { |f| f.empty? ? "pi exited with an error" : f.lines.last(5).join },
     }
   end
@@ -259,7 +264,7 @@ def build
         starter = p.starter[p.file]
         [key, {
           code: r["code"], reply: r["reply"], tools: r["tools"], loc: loc(r["code"]), error: r["error"],
-          seconds: r["seconds"], offences: r["offences"],
+          seconds: r["seconds"], tokens: r["tokens"], offences: r["offences"],
           fromReply: r["from_reply"], changed: starter ? changed_lines(starter, r["code"]) : [],
           stale: r["fingerprint"] != fingerprint(r["model"], r["variant"], p),
         }]

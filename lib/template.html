@@ -334,7 +334,7 @@ function frame(p, col, index, total) {
     o.fromReply && !o.error && `<div class="note">Didn't write the file; code taken from its reply</div>`,
     o.stale && `<div class="note">Prompt or variant changed since this ran</div>`,
   ].filter(Boolean).join("");
-  return `<article class="frame">${who}${notes}${prose}${code ? `<pre class="code">${lines}</pre>` : ""}<div class="loc"><span><b>${o.loc}</b> LOC</span><span><b>${o.tools}</b> ${o.tools === 1 ? "tool call" : "tool calls"}</span><span><b>${o.seconds}</b>s</span><span><b>${o.offences}</b> Standard ${o.offences === 1 ? "offence" : "offences"}</span></div></article>`;
+  return `<article class="frame">${who}${notes}${prose}${code ? `<pre class="code">${lines}</pre>` : ""}<div class="loc"><span><b>${o.loc}</b> LOC</span><span><b>${o.tools}</b> ${o.tools === 1 ? "tool call" : "tool calls"}</span><span><b>${o.seconds}</b>s</span>${o.tokens ? `<span><b>${o.tokens.input.toLocaleString()}</b> in / <b>${o.tokens.output.toLocaleString()}</b> out tokens</span>` : ""}<span><b>${o.offences}</b> Standard ${o.offences === 1 ? "offence" : "offences"}</span></div></article>`;
 }
 
 function promptCell(p) {
